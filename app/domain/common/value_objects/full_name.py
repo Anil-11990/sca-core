@@ -27,6 +27,7 @@ class FullName:
 
     value: str
 
+
     def __post_init__(self) -> None:
         """
         Normalize and validate the name.
@@ -47,3 +48,10 @@ class FullName:
         # Because the dataclass is frozen, this is the
         # correct way to assign the normalized value.
         object.__setattr__(self, "value", cleaned)
+
+    def __str__(self) -> str:
+        """
+        Returns the plain text representation
+        of the person's full name.
+        """
+        return self.value

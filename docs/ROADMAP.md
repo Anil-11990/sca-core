@@ -79,3 +79,108 @@ Upcoming
 # Long-Term Vision
 
 SCA becomes the Professional Operating System for individuals and organisations.
+
+## Sprint 7 - Professional Aggregate
+
+### Completed
+
+- Professional manages Skills
+- Professional manages Goals
+- Read-only collections
+- Duplicate protection
+- Aggregate Root strengthened
+
+### Test Status
+
+40 passing tests
+
+### Architecture Notes
+
+Professional is now the central Aggregate Root responsible for managing
+career-related entities through business operations instead of exposing
+mutable collections.
+
+## Sprint 8 - Application Layer
+
+### Completed
+
+- Created Application Layer
+- Implemented first Use Case
+- Added CreateProfessional use case
+- Established Application → Domain interaction
+
+### Test Status
+
+41 passing tests
+
+## Sprint 8 - Phase 2
+
+### Completed
+
+- Added AddSkill use case
+- Application layer delegates to Professional aggregate
+- Added application layer tests
+
+### Test Status
+
+42 passing tests
+
+## Sprint 8 - Phase 3
+
+### Completed
+
+- Added AddGoal use case
+- Application layer delegates goal management to Professional
+- Added application layer tests
+
+### Test Status
+
+43 passing tests
+
+## Sprint 8 - Phase 4
+
+### Completed
+
+- Added CompleteGoal use case
+- First business workflow
+- Application layer triggers domain behaviour
+
+### Test Status
+
+44 passing tests
+
+## Sprint 9 - Domain Events
+
+### Completed
+
+- Introduced DomainEvent base class
+- Added GoalCompleted event
+- Created first domain event tests
+
+### Test Status
+
+45 passing tests
+
+## Sprint 10 - Event Bus
+
+### Completed
+
+- Added EventBus
+- Introduced event publishing
+- Prepared architecture for event subscribers
+
+### Test Status
+
+46 passing tests
+
+## Sprint 11 - Repository Pattern
+
+### Completed
+
+- Added ProfessionalRepository abstraction
+- Added in-memory repository implementation
+- Verified repository behaviour with tests
+
+### Test Status
+
+47 passing tests
