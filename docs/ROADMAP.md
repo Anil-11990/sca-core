@@ -258,3 +258,33 @@ API foundation complete
 ### Result
 
 The API can now create Professionals through HTTP requests.
+
+
+## Sprint 17 ✅ REST API
+
+Completed:
+
+- FastAPI integration
+- Dependency Injection container
+- POST /professionals endpoint
+- GET /professionals/{id} endpoint
+- Request validation
+- Response models
+- API wiring
+
+## Sprint 18 — API Integration Tests ✅
+
+- Added FastAPI integration tests using TestClient
+- Tested POST /professionals
+- Tested GET /professionals/{id}
+- Added error handling tests (400 and 404)
+- Total test coverage increased to 54 passing tests
+
+## Sprint 18 ✅ API Integration
+
+- Added FastAPI integration tests
+- Tested POST /professionals
+- Tested GET /professionals/{id}
+- Tested invalid UUID handling
+- Tested missing Professional handling
+- Total tests: 54
