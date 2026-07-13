@@ -9,9 +9,9 @@ through this aggregate to ensure business rules remain consistent.
 """
 
 from __future__ import annotations
-
+from app.domain.common.value_objects.full_name import FullName
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.domain.common.entity import Entity
 from app.domain.skill.skill import Skill
@@ -29,7 +29,7 @@ class Professional(Entity):
     required to establish a stable domain model.
     """
 
-    full_name: str
+    full_name: FullName
     primary_goal: str
 
     # Optional information that can be filled in later.
@@ -40,14 +40,15 @@ class Professional(Entity):
     skills: list[Skill] = field(default_factory=list)
 
     # Records when the Professional object was created.
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(
+        default_factory=lambda: datetime.now(UTC)
+    )
 
     def __post_init__(self) -> None:
         """
         Normalise and validate the Professional immediately after creation.
         """
 
-        self.full_name = self.full_name.strip()
         self.primary_goal = self.primary_goal.strip()
 
         if not self.full_name:
