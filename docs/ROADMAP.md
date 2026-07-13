@@ -184,3 +184,77 @@ mutable collections.
 ### Test Status
 
 47 passing tests
+
+## Sprint 12 - Dependency Injection Foundation
+
+### Completed
+
+- Added Composition Root
+- Added Container
+- Centralized dependency creation
+
+### Test Status
+
+48 passing tests
+
+## Sprint 13 - Profile Completeness Service
+
+### Completed
+
+- Added ProfileCompletenessService
+- Introduced first Domain Service
+- Calculated Professional profile completeness
+
+### Test Status
+
+49 passing tests
+
+## Sprint 14 – Repository Integration
+
+### Completed
+
+- Injected ProfessionalRepository into CreateProfessional
+- Persisted Professional through repository
+- Connected Application Layer with Infrastructure
+
+### Test Status
+
+50 passing tests
+
+## Sprint 15 - API Foundation
+
+### Goal
+
+Expose the SCA Core through a FastAPI interface.
+
+### Planned
+
+- Install FastAPI
+- Create API entry point
+- Build first endpoint
+- Enable Swagger documentation
+## Sprint 15 - FastAPI Foundation
+
+### Completed
+
+- Installed FastAPI
+- Created API entry point
+- Started development server
+- Verified Swagger UI
+
+### Status
+
+API foundation complete
+
+## Sprint 16 – First API Endpoint
+
+### Completed
+
+- Created request model using Pydantic
+- Added POST /professionals endpoint
+- Connected API to CreateProfessional use case
+- Returned Professional as JSON
+
+### Result
+
+The API can now create Professionals through HTTP requests.

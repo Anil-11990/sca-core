@@ -1,20 +1,26 @@
-"""
-In-memory implementation of the Professional Repository.
+class MemoryProfessionalRepository:
+    """
+    In-memory repository for storing Professionals.
 
-Used for testing and early development.
-"""
+    This implementation is used during development and testing.
+    Later it will be replaced with PostgreSQL.
+    """
 
-from app.domain.professional.professional import Professional
-from app.domain.professional.repository import ProfessionalRepository
+    def __init__(self):
+        # Dictionary keyed by Professional ID.
+        self._professionals = {}
 
+    def save(self, professional):
+        """
+        Save or update a Professional.
+        """
+        self._professionals[professional.id] = professional
 
-class MemoryProfessionalRepository(ProfessionalRepository):
+    def get_by_id(self, professional_id):
+        """
+        Retrieve a Professional by its unique ID.
 
-    def __init__(self) -> None:
-        self._storage: dict = {}
-
-    def save(self, professional: Professional) -> None:
-        self._storage[professional.id] = professional
-
-    def get_by_id(self, entity_id):
-        return self._storage.get(entity_id)
+        Returns:
+            Professional if found, otherwise None.
+        """
+        return self._professionals.get(professional_id)
