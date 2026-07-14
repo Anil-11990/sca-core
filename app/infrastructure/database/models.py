@@ -1,0 +1,14 @@
+"""
+SQLAlchemy ORM models.
+
+These represent the database tables.
+"""
+
+from sqlalchemy.orm import DeclarativeBase
+
+
+class Base(DeclarativeBase):
+    """
+    Base class for every ORM model.
+    """
+    pass

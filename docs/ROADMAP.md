@@ -288,3 +288,13 @@ Completed:
 - Tested invalid UUID handling
 - Tested missing Professional handling
 - Total tests: 54
+
+# Milestone 3 – Persistent Storage
+
+## Sprint 19
+- [ ] Install SQLAlchemy
+- [ ] Configure SQLite
+- [ ] Create ORM models
+- [ ] Build SQLite Repository
+- [ ] Replace Memory Repository
+- [ ] Add Repository Tests
