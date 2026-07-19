@@ -9,7 +9,7 @@ through this aggregate to ensure business rules remain consistent.
 """
 
 from __future__ import annotations
-
+from app.domain.certificate.certificate import Certificate
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
@@ -18,6 +18,7 @@ from app.domain.common.value_objects.full_name import FullName
 from app.domain.goal.goal import Goal
 from app.domain.skill.skill import Skill
 
+from app.domain.achievement.achievement import Achievement
 
 @dataclass(eq=False, slots=True)
 class Professional(Entity):
@@ -69,10 +70,31 @@ class Professional(Entity):
     created_at: datetime = field(
         default_factory=lambda: datetime.now(UTC)
     )
-
+    # Internal list of achievements.
+    # Always modify using add_achievement().
+    _achievements: list[Achievement] = field(
+        default_factory=list,
+        init=False,
+        repr=False,
+    )
+    # Internal list of certificates.
+    # Always modify using add_certificate().
+    _certificates: list[Certificate] = field(
+        default_factory=list,
+        init=False,
+        repr=False,
+    )
     # ==========================================================
     # Read-only Properties
     # ==========================================================
+
+    @property
+    def certificates(self) -> tuple[Certificate, ...]:
+        """
+        Returns every certificate owned by the professional.
+        """
+
+        return tuple(self._certificates)
 
     @property
     def skills(self) -> tuple[Skill, ...]:
@@ -97,6 +119,14 @@ class Professional(Entity):
             the Professional's internal goals list.
         """
         return tuple(self._goals)
+
+    @property
+    def achievements(self) -> tuple[Achievement, ...]:
+        """
+        Returns a read-only collection of achievements.
+        """
+
+        return tuple(self._achievements)
 
     # ==========================================================
     # Business Methods
@@ -138,6 +168,23 @@ class Professional(Entity):
 
         self._goals.append(goal)
 
+    def add_certificate(
+            self,
+            certificate: Certificate,
+    ) -> None:
+        """
+        Adds a certificate.
+
+        Duplicate certificates are ignored.
+        """
+
+        if certificate in self._certificates:
+            return
+
+        self._certificates.append(
+            certificate
+        )
+
     # ==========================================================
     # Validation
     # ==========================================================
@@ -159,3 +206,20 @@ class Professional(Entity):
             raise ValueError(
                 "Primary goal cannot be empty."
             )
+
+    def add_achievement(
+            self,
+            achievement: Achievement,
+    ) -> None:
+        """
+        Adds an achievement.
+
+        Duplicate achievements are ignored.
+        """
+
+        if achievement in self._achievements:
+            return
+
+        self._achievements.append(
+            achievement
+        )
