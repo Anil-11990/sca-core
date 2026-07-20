@@ -17,9 +17,11 @@ from app.domain.common.entity import Entity
 from app.domain.common.value_objects.full_name import FullName
 from app.domain.goal.goal import Goal
 from app.domain.skill.skill import Skill
-
+from app.domain.project.project import Project
 from app.domain.achievement.achievement import Achievement
-
+from app.domain.experience.experience import (
+    Experience,
+)
 @dataclass(eq=False, slots=True)
 class Professional(Entity):
     """
@@ -42,6 +44,10 @@ class Professional(Entity):
 
     current_title: str = ""
     location: str = ""
+
+    experiences: list[Experience] = field(
+        default_factory=list
+    )
 
     # ==========================================================
     # Private Collections
@@ -83,6 +89,9 @@ class Professional(Entity):
         default_factory=list,
         init=False,
         repr=False,
+    )
+    projects: list[Project] = field(
+        default_factory=list
     )
     # ==========================================================
     # Read-only Properties
@@ -223,3 +232,78 @@ class Professional(Entity):
         self._achievements.append(
             achievement
         )
+
+    def add_experience(
+            self,
+            experience: Experience,
+    ):
+        """
+        Add an Experience.
+        """
+
+        if experience in self.experiences:
+            raise ValueError(
+                "Experience already exists."
+            )
+
+        self.experiences.append(
+            experience
+        )
+
+    def remove_experience(
+            self,
+            experience_id,
+    ):
+        """
+        Remove an Experience.
+        """
+
+        self.experiences = [
+
+            experience
+
+            for experience in self.experiences
+
+            if experience.id != experience_id
+        ]
+
+    def get_experience(
+            self,
+            experience_id,
+    ):
+        """
+        Retrieve an Experience.
+        """
+
+        for experience in self.experiences:
+
+            if experience.id == experience_id:
+                return experience
+
+        return None
+
+    def add_project(
+            self,
+            project: Project,
+    ) -> None:
+        """
+        Add a project.
+        """
+
+        self.projects.append(
+            project
+        )
+
+    def remove_project(
+            self,
+            project_id,
+    ) -> None:
+        """
+        Remove a project.
+        """
+
+        self.projects = [
+            project
+            for project in self.projects
+            if project.id != project_id
+        ]

@@ -54,8 +54,12 @@ from app.interfaces.api.schemas.achievement_request import (
 from app.interfaces.api.schemas.achievement_response import (
     AchievementResponse,
 )
-
-
+from app.interfaces.api.schemas.experience_response import (
+    ExperienceResponse,
+)
+from app.interfaces.api.schemas.experience_request import (
+    ExperienceRequest,
+)
 # =============================================================================
 # API Mappers
 # =============================================================================
@@ -67,7 +71,9 @@ from app.interfaces.api.mappers.professional_mapper import (
 from app.interfaces.api.mappers.achievement_mapper import (
     AchievementMapper,
 )
-
+from app.interfaces.api.mappers.experience_mapper import (
+    ExperienceMapper,
+)
 
 # =============================================================================
 # Domain
@@ -82,8 +88,28 @@ from app.domain.achievement.achievement_type import (
 from app.domain.achievement.value_objects.achievement_title import (
     AchievementTitle,
 )
+from app.domain.experience.value_objects.job_title import (
+    JobTitle,
+)
 
+from app.domain.experience.value_objects.company_name import (
+    CompanyName,
+)
 
+from app.domain.experience.value_objects.experience_period import (
+    ExperiencePeriod,
+)
+from app.domain.experience.experience import (
+    Experience,
+)
+
+from app.domain.experience.employment_type import (
+    EmploymentType,
+)
+
+from app.domain.experience.experience_description import (
+    ExperienceDescription,
+)
 from app.domain.certificate.certificate import Certificate
 from app.domain.certificate.certificate_status import CertificateStatus
 from app.domain.certificate.value_objects.certificate_name import (
@@ -461,4 +487,141 @@ def get_certificates(
             issued_at=item.issued_date,
         )
         for item in certificates
+    ]
+@router.post(
+    "/professionals/{professional_id}/experiences",
+    response_model=ExperienceResponse,
+)
+def add_experience(
+    professional_id: str,
+    request: ExperienceRequest,
+):
+    """
+    Add an Experience to a Professional.
+    """
+
+    try:
+        professional_uuid = UUID(
+            professional_id
+        )
+
+    except ValueError:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid UUID.",
+        )
+
+    employment_lookup = {
+
+        "full_time": EmploymentType.FULL_TIME,
+        "part_time": EmploymentType.PART_TIME,
+        "contract": EmploymentType.CONTRACT,
+        "internship": EmploymentType.INTERNSHIP,
+        "freelance": EmploymentType.FREELANCE,
+        "volunteer": EmploymentType.VOLUNTEER,
+    }
+
+    employment_type = employment_lookup.get(
+        request.employment_type.lower()
+    )
+
+    if employment_type is None:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid employment type.",
+        )
+
+    period = ExperiencePeriod(
+        start_date=date.fromisoformat(
+            request.start_date
+        ),
+        end_date=(
+            date.fromisoformat(
+                request.end_date
+            )
+            if request.end_date
+            else None
+        ),
+    )
+
+    experience = Experience(
+
+        job_title=JobTitle(
+            request.job_title
+        ),
+
+        company_name=CompanyName(
+            request.company_name
+        ),
+
+        employment_type=employment_type,
+
+        experience_period=period,
+
+        description=ExperienceDescription(
+            request.description
+        ),
+    )
+
+    use_case = (
+        container.add_experience_use_case()
+    )
+
+    professional = use_case.execute(
+        professional_uuid,
+        experience,
+    )
+
+    if professional is None:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Professional not found.",
+        )
+
+    return ExperienceMapper.to_response(
+        experience
+    )
+@router.get(
+    "/professionals/{professional_id}/experiences",
+    response_model=list[ExperienceResponse],
+)
+def get_experiences(
+    professional_id: str,
+):
+    """
+    Retrieve every Experience
+    belonging to a Professional.
+    """
+
+    try:
+
+        professional_uuid = UUID(
+            professional_id
+        )
+
+    except ValueError:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid UUID.",
+        )
+
+    use_case = (
+        container.get_experiences_use_case()
+    )
+
+    experiences = use_case.execute(
+        professional_uuid
+    )
+
+    return [
+
+        ExperienceMapper.to_response(
+            experience
+        )
+
+        for experience in experiences
     ]

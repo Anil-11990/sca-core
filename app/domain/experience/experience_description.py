@@ -1,32 +1,33 @@
 """
-Job Title Value Object.
+Experience Description Value Object.
 """
 
 from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class JobTitle:
+class ExperienceDescription:
     """
-    Represents a job title.
+    Represents an experience description.
     """
 
     value: str
 
     def __post_init__(self):
-        if not self.value:
+
+        if self.value is None:
             raise ValueError(
-                "Job title cannot be empty."
+                "Description cannot be None."
             )
 
         if not self.value.strip():
             raise ValueError(
-                "Job title cannot contain only spaces."
+                "Description cannot be empty."
             )
 
-        if len(self.value.strip()) > 100:
+        if len(self.value.strip()) > 1000:
             raise ValueError(
-                "Job title cannot exceed 100 characters."
+                "Description cannot exceed 1000 characters."
             )
 
     def __str__(self):

@@ -7,7 +7,13 @@ dependencies.
 Only this module should know which concrete
 implementations are used.
 """
+from app.application.use_cases.add_experience import (
+    AddExperienceUseCase,
+)
 
+from app.application.use_cases.get_experiences import (
+    GetExperiencesUseCase,
+)
 from app.application.use_cases.create_professional import CreateProfessional
 from app.application.use_cases.get_professional import GetProfessional
 from app.infrastructure.repositories.memory_professional_repository import (
@@ -84,6 +90,27 @@ class Container:
             repository=self.professional_repository,
         )
 
+    def add_experience_use_case(
+            self,
+    ):
+        """
+        Build AddExperienceUseCase.
+        """
+
+        return AddExperienceUseCase(
+            self.professional_repository
+        )
+
+    def get_experiences_use_case(
+            self,
+    ):
+        """
+        Build GetExperiencesUseCase.
+        """
+
+        return GetExperiencesUseCase(
+            self.professional_repository
+        )
 # -----------------------------------------------------------------------------
 # Global Dependency Container
 # -----------------------------------------------------------------------------

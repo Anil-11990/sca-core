@@ -1,28 +1,44 @@
-from dataclasses import dataclass, field
-from datetime import UTC, datetime
+"""
+Experience Entity.
+"""
+
+from dataclasses import dataclass
 
 from app.domain.common.entity import Entity
-from app.domain.experience.value_objects.job_title import RoleTitle
-from app.domain.experience.value_objects.company_name import CompanyName
+
+from app.domain.experience.value_objects.job_title import (
+    JobTitle,
+)
+
+from app.domain.experience.value_objects.company_name import (
+    CompanyName,
+)
+
+from app.domain.experience.value_objects.experience_period import (
+    ExperiencePeriod,
+)
+
+from app.domain.experience.experience_description import (
+    ExperienceDescription,
+)
+
+from app.domain.experience.employment_type import (
+    EmploymentType,
+)
 
 
 @dataclass(eq=False, slots=True)
 class Experience(Entity):
+    """
+    Represents a Professional Experience.
+    """
 
-    # Required fields
-    role: RoleTitle
-    company: CompanyName
-    description: str
+    job_title: JobTitle
 
-    # Optional/default fields
-    created_at: datetime = field(
-        default_factory=lambda: datetime.now(UTC)
-    )
+    company_name: CompanyName
 
-    def __post_init__(self) -> None:
-        self.description = self.description.strip()
+    employment_type: EmploymentType
 
-        if not self.description:
-            raise ValueError(
-                "Description cannot be empty."
-            )
+    experience_period: ExperiencePeriod
+
+    description: ExperienceDescription
