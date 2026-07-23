@@ -25,7 +25,15 @@ from app.domain.experience.experience_description import (
 from app.domain.experience.employment_type import (
     EmploymentType,
 )
-
+from app.domain.experience.value_objects.job_title import JobTitle
+from app.domain.experience.value_objects.company_name import CompanyName
+from app.domain.experience.value_objects.experience_period import (
+    ExperiencePeriod,
+)
+from app.domain.experience.experience_description import (
+    ExperienceDescription,
+)
+from app.domain.experience.employment_type import EmploymentType
 
 @dataclass(eq=False, slots=True)
 class Experience(Entity):

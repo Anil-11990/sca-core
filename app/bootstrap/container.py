@@ -17,8 +17,20 @@ from app.application.use_cases.get_experiences import (
 from app.application.use_cases.create_professional import CreateProfessional
 from app.application.use_cases.get_professional import GetProfessional
 from app.infrastructure.repositories.memory_professional_repository import (
-    MemoryProfessionalRepository,
+    MemoryProfessionalRepository,)
+from app.application.use_cases.add_project import (AddProject,)
+from app.application.use_cases.add_timeline_event import (
+    AddTimelineEventUseCase,
 )
+
+from app.application.use_cases.get_timeline_events import (
+    GetTimelineEventsUseCase,
+)
+
+from app.application.use_cases.remove_timeline_event import (
+    RemoveTimelineEventUseCase,
+)
+from app.application.use_cases.get_projects import (GetProjects,)
 from app.application.use_cases.add_achievement import AddAchievement
 from app.application.use_cases.get_achievements import GetAchievements
 from app.application.use_cases.add_certificate import AddCertificate
@@ -110,6 +122,66 @@ class Container:
 
         return GetExperiencesUseCase(
             self.professional_repository
+        )
+
+    def add_project_use_case(
+            self,
+    ):
+        """
+        Build AddProject use case.
+        """
+
+        return AddProject(
+            self.professional_repository
+        )
+
+    def get_projects_use_case(
+            self,
+    ):
+        """
+        Build GetProjects use case.
+        """
+
+        return GetProjects(
+            self.professional_repository
+        )
+    # -------------------------------------------------------------------------
+    # Timeline Use Cases
+    # -------------------------------------------------------------------------
+
+    def add_timeline_event_use_case(
+        self,
+    ) -> AddTimelineEventUseCase:
+        """
+        Build AddTimelineEvent use case.
+        """
+
+        return AddTimelineEventUseCase(
+            repository=self.professional_repository
+        )
+
+
+    def get_timeline_events_use_case(
+        self,
+    ) -> GetTimelineEventsUseCase:
+        """
+        Build GetTimelineEvents use case.
+        """
+
+        return GetTimelineEventsUseCase(
+            repository=self.professional_repository
+        )
+
+
+    def remove_timeline_event_use_case(
+        self,
+    ) -> RemoveTimelineEventUseCase:
+        """
+        Build RemoveTimelineEvent use case.
+        """
+
+        return RemoveTimelineEventUseCase(
+            repository=self.professional_repository
         )
 # -----------------------------------------------------------------------------
 # Global Dependency Container

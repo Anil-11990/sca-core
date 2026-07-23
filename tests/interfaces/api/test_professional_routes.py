@@ -8,9 +8,6 @@ from app.domain.common.value_objects.full_name import FullName
 
 from app.domain.achievement.achievement import Achievement
 
-from app.domain.achievement.achievement_type import (
-    AchievementType,
-)
 
 from app.domain.achievement.value_objects.achievement_title import (
     AchievementTitle,
@@ -261,3 +258,68 @@ def test_get_certificates():
     assert data[0]["name"] == "AWS Developer"
 
     assert data[0]["issuer"] == "Amazon"
+
+def test_add_project():
+
+    professional = client.post(
+        "/professionals",
+        json={
+            "full_name": "Anil Khanal",
+            "primary_goal": "Build ANIrex",
+        },
+    ).json()
+
+    response = client.post(
+        f"/professionals/{professional['id']}/projects",
+        json={
+            "name": "SCA",
+            "description": "Professional Operating System",
+            "repository_url": "https://github.com/anirex/sca",
+            "live_url": "",
+            "technologies": [
+                "Python",
+                "FastAPI",
+            ],
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["name"] == "SCA"
+
+def test_get_projects():
+
+    professional = client.post(
+        "/professionals",
+        json={
+            "full_name": "Anil Khanal",
+            "primary_goal": "Build ANIrex",
+        },
+    ).json()
+
+    client.post(
+        f"/professionals/{professional['id']}/projects",
+        json={
+            "name": "SCA",
+            "description": "Professional Operating System",
+            "repository_url": "",
+            "live_url": "",
+            "technologies": [
+                "Python",
+            ],
+        },
+    )
+
+    response = client.get(
+        f"/professionals/{professional['id']}/projects"
+    )
+
+    assert response.status_code == 200
+
+    projects = response.json()
+
+    assert len(projects) == 1
+
+    assert projects[0]["name"] == "SCA"

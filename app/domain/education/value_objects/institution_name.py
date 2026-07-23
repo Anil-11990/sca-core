@@ -1,22 +1,46 @@
 """
 Institution Name Value Object.
+
+Represents the educational organisation
+where a professional studied.
+
+Examples:
+    - University of West London
+    - Stanford University
+    - MIT
+
+This keeps institution validation inside
+the domain instead of spreading rules everywhere.
 """
 
 from dataclasses import dataclass
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class InstitutionName:
-    """
-    Represents an educational institution.
-    """
 
     value: str
 
-    def __post_init__(self) -> None:
-        value = self.value.strip()
+    def __str__(self) -> str:
+        return self.value
 
-        if not value:
+    def __eq__(self, other) -> bool:
+        if isinstance(other, InstitutionName):
+            return self.value == other.value
+
+        if isinstance(other, str):
+            return self.value == other
+
+        return False
+
+    def __post_init__(self) -> None:
+        """
+        Validate and clean institution name.
+        """
+
+        cleaned_value = self.value.strip()
+
+        if not cleaned_value:
             raise ValueError(
                 "Institution name cannot be empty."
             )
@@ -24,8 +48,12 @@ class InstitutionName:
         object.__setattr__(
             self,
             "value",
-            value,
+            cleaned_value,
         )
 
     def __str__(self) -> str:
+        """
+        Returns readable institution name.
+        """
+
         return self.value

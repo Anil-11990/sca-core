@@ -9,199 +9,167 @@ through this aggregate to ensure business rules remain consistent.
 """
 
 from __future__ import annotations
-from app.domain.certificate.certificate import Certificate
+
+# =============================================================================
+# Standard Library
+# =============================================================================
+
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
+# =============================================================================
+# Domain
+# =============================================================================
+
+from app.domain.achievement.achievement import Achievement
+from app.domain.certificate.certificate import Certificate
 from app.domain.common.entity import Entity
 from app.domain.common.value_objects.full_name import FullName
+from app.domain.education.education import Education
+from app.domain.experience.experience import Experience
 from app.domain.goal.goal import Goal
-from app.domain.skill.skill import Skill
 from app.domain.project.project import Project
-from app.domain.achievement.achievement import Achievement
-from app.domain.experience.experience import (
-    Experience,
+from app.domain.skill.skill import Skill
+from app.domain.timeline.timeline_event import (
+    TimelineEvent,
 )
+
+
+# =============================================================================
+# Professional Aggregate Root
+# =============================================================================
+
 @dataclass(eq=False, slots=True)
 class Professional(Entity):
     """
-    Represents a professional within the SCA domain.
+    Represents a Professional within the SCA domain.
 
     The Professional is the Aggregate Root responsible for managing
-    professional identity, goals, and capabilities.
+    professional identity, career progression, achievements,
+    projects, education, skills and goals.
     """
 
-    # ==========================================================
+    # =========================================================================
     # Required Fields
-    # ==========================================================
+    # =========================================================================
 
     full_name: FullName
     primary_goal: str
 
-    # ==========================================================
-    # Optional Fields
-    # ==========================================================
+    # =========================================================================
+    # Optional Profile Information
+    # =========================================================================
 
     current_title: str = ""
     location: str = ""
+
+    # =========================================================================
+    # Aggregate Collections
+    # =========================================================================
 
     experiences: list[Experience] = field(
         default_factory=list
     )
 
-    # ==========================================================
-    # Private Collections
-    # ==========================================================
+    projects: list[Project] = field(
+        default_factory=list
+    )
 
-    # Internal list of skills.
-    # Always modify using add_skill().
+    educations: list[Education] = field(
+        default_factory=list
+    )
+
+    # =========================================================================
+    # Internal Collections
+    # =========================================================================
+
+    # Always modify through add_skill()
     _skills: list[Skill] = field(
         default_factory=list,
         init=False,
-        repr=False
+        repr=False,
     )
 
-    # Internal list of goals.
-    # Always modify using add_goal().
+    # Always modify through add_goal()
     _goals: list[Goal] = field(
         default_factory=list,
         init=False,
-        repr=False
+        repr=False,
     )
 
-    # ==========================================================
-    # Metadata
-    # ==========================================================
-
-    created_at: datetime = field(
-        default_factory=lambda: datetime.now(UTC)
-    )
-    # Internal list of achievements.
-    # Always modify using add_achievement().
+    # Always modify through add_achievement()
     _achievements: list[Achievement] = field(
         default_factory=list,
         init=False,
         repr=False,
     )
-    # Internal list of certificates.
-    # Always modify using add_certificate().
+
+    # Always modify through add_certificate()
     _certificates: list[Certificate] = field(
         default_factory=list,
         init=False,
         repr=False,
     )
-    projects: list[Project] = field(
+    timeline: list[TimelineEvent] = field(
         default_factory=list
+
     )
-    # ==========================================================
+
+    # =========================================================================
+    # Metadata
+    # =========================================================================
+
+    created_at: datetime = field(
+        default_factory=lambda: datetime.now(UTC)
+    )
+
+    # =========================================================================
     # Read-only Properties
-    # ==========================================================
-
-    @property
-    def certificates(self) -> tuple[Certificate, ...]:
-        """
-        Returns every certificate owned by the professional.
-        """
-
-        return tuple(self._certificates)
+    # =========================================================================
 
     @property
     def skills(self) -> tuple[Skill, ...]:
         """
-        Purpose:
-            Returns a read-only collection of skills.
+        Returns every skill owned by the Professional.
 
-        Business Rule:
-            Outside code cannot directly modify
-            the Professional's internal skills list.
+        External code cannot modify the internal collection.
         """
+
         return tuple(self._skills)
 
     @property
     def goals(self) -> tuple[Goal, ...]:
         """
-        Purpose:
-            Returns a read-only collection of goals.
+        Returns every goal owned by the Professional.
 
-        Business Rule:
-            Outside code cannot directly modify
-            the Professional's internal goals list.
+        External code cannot modify the internal collection.
         """
+
         return tuple(self._goals)
 
     @property
     def achievements(self) -> tuple[Achievement, ...]:
         """
-        Returns a read-only collection of achievements.
+        Returns every achievement owned by the Professional.
         """
 
         return tuple(self._achievements)
 
-    # ==========================================================
-    # Business Methods
-    # ==========================================================
-
-    def add_skill(self, skill: Skill) -> None:
+    @property
+    def certificates(self) -> tuple[Certificate, ...]:
         """
-        Purpose:
-            Adds a skill to the Professional.
-
-        Business Rule:
-            Duplicate skills are ignored.
-
-        Future Extension:
-            Skill proficiency and acquisition
-            dates may be handled here.
+        Returns every certificate owned by the Professional.
         """
 
-        if skill in self._skills:
-            return
+        return tuple(self._certificates)
 
-        self._skills.append(skill)
-
-    def add_goal(self, goal: Goal) -> None:
-        """
-        Purpose:
-            Adds a goal to the Professional.
-
-        Business Rule:
-            Duplicate goals are ignored.
-
-        Future Extension:
-            Goal priorities, dependencies and
-            scheduling logic may be added here.
-        """
-
-        if goal in self._goals:
-            return
-
-        self._goals.append(goal)
-
-    def add_certificate(
-            self,
-            certificate: Certificate,
-    ) -> None:
-        """
-        Adds a certificate.
-
-        Duplicate certificates are ignored.
-        """
-
-        if certificate in self._certificates:
-            return
-
-        self._certificates.append(
-            certificate
-        )
-
-    # ==========================================================
+    # =========================================================================
     # Validation
-    # ==========================================================
+    # =========================================================================
 
     def __post_init__(self) -> None:
         """
-        Normalises and validates the Professional
-        immediately after creation.
+        Validates the Professional immediately after creation.
         """
 
         self.primary_goal = self.primary_goal.strip()
@@ -216,12 +184,54 @@ class Professional(Entity):
                 "Primary goal cannot be empty."
             )
 
-    def add_achievement(
-            self,
-            achievement: Achievement,
+    # =========================================================================
+    # Skill Operations
+    # =========================================================================
+
+    def add_skill(
+        self,
+        skill: Skill,
     ) -> None:
         """
-        Adds an achievement.
+        Adds a Skill.
+
+        Duplicate skills are ignored.
+        """
+
+        if skill in self._skills:
+            return
+
+        self._skills.append(skill)
+
+    # =========================================================================
+    # Goal Operations
+    # =========================================================================
+
+    def add_goal(
+        self,
+        goal: Goal,
+    ) -> None:
+        """
+        Adds a Goal.
+
+        Duplicate goals are ignored.
+        """
+
+        if goal in self._goals:
+            return
+
+        self._goals.append(goal)
+
+    # =========================================================================
+    # Achievement Operations
+    # =========================================================================
+
+    def add_achievement(
+        self,
+        achievement: Achievement,
+    ) -> None:
+        """
+        Adds an Achievement.
 
         Duplicate achievements are ignored.
         """
@@ -229,16 +239,40 @@ class Professional(Entity):
         if achievement in self._achievements:
             return
 
-        self._achievements.append(
-            achievement
-        )
+        self._achievements.append(achievement)
+
+    # =========================================================================
+    # Certificate Operations
+    # =========================================================================
+
+    def add_certificate(
+        self,
+        certificate: Certificate,
+    ) -> None:
+        """
+        Adds a Certificate.
+
+        Duplicate certificates are ignored.
+        """
+
+        if certificate in self._certificates:
+            return
+
+        self._certificates.append(certificate)
+
+    # =========================================================================
+    # Experience Operations
+    # =========================================================================
 
     def add_experience(
-            self,
-            experience: Experience,
-    ):
+        self,
+        experience: Experience,
+    ) -> None:
         """
-        Add an Experience.
+        Adds an Experience.
+
+        Business Rule:
+            Duplicate experiences are not allowed.
         """
 
         if experience in self.experiences:
@@ -246,60 +280,61 @@ class Professional(Entity):
                 "Experience already exists."
             )
 
-        self.experiences.append(
-            experience
-        )
+        self.experiences.append(experience)
 
     def remove_experience(
-            self,
-            experience_id,
-    ):
+        self,
+        experience_id,
+    ) -> None:
         """
-        Remove an Experience.
+        Removes an Experience by its identifier.
         """
 
         self.experiences = [
-
             experience
-
             for experience in self.experiences
-
             if experience.id != experience_id
         ]
 
     def get_experience(
-            self,
-            experience_id,
+        self,
+        experience_id,
     ):
         """
-        Retrieve an Experience.
+        Returns an Experience by its identifier.
+
+        Returns:
+            Experience if found, otherwise None.
         """
 
         for experience in self.experiences:
-
             if experience.id == experience_id:
                 return experience
 
         return None
 
+    # =========================================================================
+    # Project Operations
+    # =========================================================================
+
     def add_project(
-            self,
-            project: Project,
+        self,
+        project: Project,
     ) -> None:
         """
-        Add a project.
+        Adds a Project.
+
+        Duplicate projects are currently allowed.
         """
 
-        self.projects.append(
-            project
-        )
+        self.projects.append(project)
 
     def remove_project(
-            self,
-            project_id,
+        self,
+        project_id,
     ) -> None:
         """
-        Remove a project.
+        Removes a Project by its identifier.
         """
 
         self.projects = [
@@ -307,3 +342,95 @@ class Professional(Entity):
             for project in self.projects
             if project.id != project_id
         ]
+
+    # =========================================================================
+    # Education Operations
+    # =========================================================================
+
+    def add_education(
+            self,
+            education: Education,
+    ) -> None:
+        """
+        Adds an Education record.
+
+        Duplicate education records are ignored.
+        """
+
+        if education in self.educations:
+            return
+
+        self.educations.append(
+            education
+        )
+
+    def remove_education(
+            self,
+            education_id,
+    ) -> None:
+        """
+        Removes Education by identifier.
+        """
+
+        self.educations = [
+            education
+            for education in self.educations
+            if education.id != education_id
+        ]
+
+    def get_education(
+            self,
+            education_id,
+    ):
+        """
+        Returns Education by identifier.
+        """
+
+        for education in self.educations:
+            if education.id == education_id:
+                return education
+
+        return None
+
+    def add_timeline_event(
+            self,
+            event: TimelineEvent,
+    ) -> None:
+        """
+        Adds a timeline event.
+
+        Duplicate events are ignored.
+        """
+
+        if event in self.timeline:
+            return
+
+        self.timeline.append(event)
+
+    def remove_timeline_event(
+            self,
+            event_id,
+    ) -> None:
+        """
+        Removes a timeline event.
+        """
+
+        self.timeline = [
+            event
+            for event in self.timeline
+            if event.id != event_id
+        ]
+
+    def get_timeline_event(
+            self,
+            event_id,
+    ):
+        """
+        Returns a timeline event by id.
+        """
+
+        for event in self.timeline:
+            if event.id == event_id:
+                return event
+
+        return None

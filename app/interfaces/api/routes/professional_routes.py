@@ -15,10 +15,13 @@ Business rules belong in the Domain layer.
 # =============================================================================
 # Standard Library
 # =============================================================================
+
 from datetime import date
 from uuid import UUID
 
-
+from app.exceptions.professional_not_found import (
+    ProfessionalNotFoundException,
+)
 
 # =============================================================================
 # Third Party
@@ -26,23 +29,19 @@ from uuid import UUID
 
 from fastapi import APIRouter
 from fastapi import HTTPException
-
-from datetime import date
 # =============================================================================
 # Bootstrap
 # =============================================================================
 
 from app.bootstrap.container import container
 
-
 # =============================================================================
-# Schemas
+# API Schemas
 # =============================================================================
 
 from app.interfaces.api.schemas.professional_request import (
     ProfessionalRequest,
 )
-
 from app.interfaces.api.schemas.professional_response import (
     ProfessionalResponse,
 )
@@ -50,16 +49,31 @@ from app.interfaces.api.schemas.professional_response import (
 from app.interfaces.api.schemas.achievement_request import (
     AchievementRequest,
 )
-
 from app.interfaces.api.schemas.achievement_response import (
     AchievementResponse,
+)
+
+from app.interfaces.api.schemas.certificate_request import (
+    CertificateRequest,
+)
+from app.interfaces.api.schemas.certificate_response import (
+    CertificateResponse,
+)
+
+from app.interfaces.api.schemas.experience_request import (
+    ExperienceRequest,
 )
 from app.interfaces.api.schemas.experience_response import (
     ExperienceResponse,
 )
-from app.interfaces.api.schemas.experience_request import (
-    ExperienceRequest,
+
+from app.interfaces.api.schemas.project_request import (
+    ProjectRequest,
 )
+from app.interfaces.api.schemas.project_response import (
+    ProjectResponse,
+)
+from app.interfaces.api.routes.education_routes import router as education_router
 # =============================================================================
 # API Mappers
 # =============================================================================
@@ -71,15 +85,21 @@ from app.interfaces.api.mappers.professional_mapper import (
 from app.interfaces.api.mappers.achievement_mapper import (
     AchievementMapper,
 )
+
 from app.interfaces.api.mappers.experience_mapper import (
     ExperienceMapper,
 )
 
+from app.interfaces.api.mappers.project_mapper import (
+    ProjectMapper,
+)
 # =============================================================================
-# Domain
+# Domain - Achievement
 # =============================================================================
 
-from app.domain.achievement.achievement import Achievement
+from app.domain.achievement.achievement import (
+    Achievement,
+)
 
 from app.domain.achievement.achievement_type import (
     AchievementType,
@@ -88,17 +108,42 @@ from app.domain.achievement.achievement_type import (
 from app.domain.achievement.value_objects.achievement_title import (
     AchievementTitle,
 )
-from app.domain.experience.value_objects.job_title import (
-    JobTitle,
+from app.exceptions.professional_not_found import (
+    ProfessionalNotFoundException,
 )
 
-from app.domain.experience.value_objects.company_name import (
-    CompanyName,
+from app.domain.achievement.value_objects.issuer import (
+    Issuer as AchievementIssuer,
 )
 
-from app.domain.experience.value_objects.experience_period import (
-    ExperiencePeriod,
+# =============================================================================
+# Domain - Certificate
+# =============================================================================
+
+from app.domain.certificate.certificate import (
+    Certificate,
 )
+
+from app.domain.certificate.certificate_status import (
+    CertificateStatus,
+)
+
+from app.domain.certificate.value_objects.certificate_name import (
+    CertificateName,
+)
+
+from app.domain.certificate.value_objects.certificate_issuer import (
+    Issuer as CertificateIssuer,
+)
+
+from app.domain.certificate.value_objects.credential_id import (
+    CredentialId,
+)
+
+# =============================================================================
+# Domain - Experience
+# =============================================================================
+
 from app.domain.experience.experience import (
     Experience,
 )
@@ -110,35 +155,39 @@ from app.domain.experience.employment_type import (
 from app.domain.experience.experience_description import (
     ExperienceDescription,
 )
-from app.domain.certificate.certificate import Certificate
-from app.domain.certificate.certificate_status import CertificateStatus
-from app.domain.certificate.value_objects.certificate_name import (
-    CertificateName,
-)
-from app.domain.achievement.value_objects.issuer import (
-    Issuer as AchievementIssuer,
+
+from app.domain.experience.value_objects.job_title import (
+    JobTitle,
 )
 
-from app.domain.certificate.value_objects.certificate_issuer import (
-    Issuer as CertificateIssuer,
-)
-from app.domain.certificate.value_objects.credential_id import (
-    CredentialId,
+from app.domain.experience.value_objects.company_name import (
+    CompanyName,
 )
 
-from app.interfaces.api.schemas.certificate_request import (
-    CertificateRequest,
-)
-from app.interfaces.api.schemas.certificate_response import (
-    CertificateResponse,
+from app.domain.experience.value_objects.experience_period import (
+    ExperiencePeriod,
 )
 
+# =============================================================================
+# Domain - Project
+# =============================================================================
+
+from app.domain.project.project import (
+    Project,
+)
+
+from app.domain.project.value_objects.project_name import (
+    ProjectName,
+)
 # =============================================================================
 # Router
 # =============================================================================
 
 router = APIRouter()
 
+router.include_router(
+    education_router
+)
 
 
 # =============================================================================
@@ -158,20 +207,19 @@ def create_professional(
     Create a new Professional.
     """
 
-    use_case = (
-        container.create_professional_use_case()
-    )
+    use_case = container.create_professional_use_case()
 
     professional = use_case.execute(
         full_name=request.full_name,
         primary_goal=request.primary_goal,
     )
 
-    return ProfessionalMapper.to_response(
-        professional
+    return ProfessionalResponse(
+        id=str(professional.id),
+        full_name=str(professional.full_name),
+        primary_goal=professional.primary_goal,
+        created_at=professional.created_at,
     )
-
-
 
 @router.get(
     "/professionals/{professional_id}",
@@ -181,43 +229,35 @@ def get_professional(
     professional_id: str,
 ):
     """
-    Retrieve a Professional by ID.
+    Retrieve a Professional.
     """
 
     try:
-        professional_uuid = UUID(
-            professional_id
-        )
-
+        professional_uuid = UUID(professional_id)
     except ValueError:
         raise HTTPException(
             status_code=400,
-            detail="Invalid UUID.",
+            detail="Invalid UUID format.",
         )
 
+    use_case = container.get_professional_use_case()
 
-    use_case = (
-        container.get_professional_use_case()
-    )
-
-    professional = use_case.execute(
-        professional_uuid
-    )
-
-
-    if professional is None:
+    try:
+        professional = use_case.execute(
+            professional_uuid
+        )
+    except ProfessionalNotFoundException:
         raise HTTPException(
             status_code=404,
             detail="Professional not found.",
         )
 
-
-    return ProfessionalMapper.to_response(
-        professional
+    return ProfessionalResponse(
+        id=str(professional.id),
+        full_name=str(professional.full_name),
+        primary_goal=professional.primary_goal,
+        created_at=professional.created_at,
     )
-
-
-
 # =============================================================================
 # Achievement Endpoints
 # =============================================================================
@@ -624,4 +664,98 @@ def get_experiences(
         )
 
         for experience in experiences
+    ]
+@router.post(
+    "/professionals/{professional_id}/projects",
+    response_model=ProjectResponse,
+)
+def add_project(
+    professional_id: str,
+    request: ProjectRequest,
+):
+    """
+    Add a Project to a Professional.
+    """
+
+    try:
+        professional_uuid = UUID(
+            professional_id
+        )
+
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid UUID.",
+        )
+
+    project = Project(
+
+        name=ProjectName(
+            request.name
+        ),
+
+        description=request.description,
+
+        repository_url=request.repository_url,
+
+        live_url=request.live_url,
+
+        technologies=request.technologies,
+    )
+
+    use_case = (
+        container.add_project_use_case()
+    )
+
+    professional = use_case.execute(
+        professional_uuid,
+        project,
+    )
+
+    if professional is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Professional not found.",
+        )
+
+    return ProjectMapper.to_response(
+        project
+    )
+@router.get(
+    "/professionals/{professional_id}/projects",
+    response_model=list[ProjectResponse],
+)
+def get_projects(
+    professional_id: str,
+):
+    """
+    Retrieve Projects belonging to a Professional.
+    """
+
+    try:
+        professional_uuid = UUID(
+            professional_id
+        )
+
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid UUID.",
+        )
+
+    use_case = (
+        container.get_projects_use_case()
+    )
+
+    projects = use_case.execute(
+        professional_uuid
+    )
+
+    return [
+
+        ProjectMapper.to_response(
+            project
+        )
+
+        for project in projects
     ]
