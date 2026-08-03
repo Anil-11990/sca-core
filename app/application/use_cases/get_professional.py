@@ -1,22 +1,42 @@
 from uuid import UUID
 
-from app.domain.professional.professional import Professional
-from app.domain.professional.repository import ProfessionalRepository
+from app.exceptions.professional_not_found import (
+    ProfessionalNotFoundException,
+)
 
 
 class GetProfessional:
     """
-    Retrieves a Professional by ID.
+    Retrieve a Professional.
     """
 
-    def __init__(self, repository: ProfessionalRepository):
-        self.repository = repository
 
-    def execute(self, professional_id: UUID) -> Professional | None:
-        """
-        Retrieve a Professional using its UUID.
+    def __init__(
+        self,
+        repository,
+    ):
 
-        The API layer is responsible for converting
-        incoming strings into UUID objects.
-        """
-        return self.repository.get_by_id(professional_id)
+        self._repository = repository
+
+
+
+    def execute(
+        self,
+        professional_id: UUID,
+    ):
+
+        professional = (
+            self._repository.get_by_id(
+                professional_id
+            )
+        )
+
+
+        if professional is None:
+
+            raise ProfessionalNotFoundException(
+                professional_id
+            )
+
+
+        return professional

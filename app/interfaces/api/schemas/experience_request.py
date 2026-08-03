@@ -2,6 +2,8 @@
 Experience Request Schema.
 """
 
+from datetime import date
+
 from pydantic import BaseModel
 
 
@@ -19,6 +21,6 @@ class ExperienceRequest(BaseModel):
 
     description: str
 
-    start_date: str
+    start_date: date
 
-    end_date: str | None = None
+    end_date: date | None = None

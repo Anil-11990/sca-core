@@ -30,7 +30,13 @@ from app.domain.achievement.achievement_type import AchievementType
 from app.domain.achievement.value_objects.achievement_title import (
     AchievementTitle,
 )
-from app.domain.achievement.value_objects.issuer import Issuer
+from app.domain.achievement.value_objects.issuer import (
+    Issuer as AchievementIssuer,
+)
+
+from app.domain.certificate.value_objects.certificate_issuer import (
+    Issuer as CertificateIssuer,
+)
 
 from app.domain.education.education import Education
 from app.domain.education.degree_level import DegreeLevel
@@ -63,7 +69,18 @@ from app.domain.experience.experience_description import (
 from app.domain.experience.employment_type import (
     EmploymentType,
 )
+from app.domain.certificate.certificate import Certificate
+from app.domain.certificate.certificate_status import CertificateStatus
+from app.domain.certificate.value_objects.certificate_name import CertificateName
+from app.domain.certificate.value_objects.credential_id import CredentialId
 
+from app.domain.project.project import Project
+from app.domain.project.value_objects.project_name import ProjectName
+from app.domain.skill.skill import Skill
+
+from app.infrastructure.database.models import (
+    SkillModel,
+)
 # ==========================================================
 # Infrastructure
 # ==========================================================
@@ -75,6 +92,9 @@ from app.infrastructure.database.models import (
     EducationModel,
     ExperienceModel,
     TimelineEventModel,
+    CertificateModel,
+    ProjectModel,
+    SkillModel,
 )
 
 from app.infrastructure.database.session import (
@@ -126,8 +146,27 @@ class SQLiteProfessionalRepository(
         # Goals
         # ------------------------------------------------------
 
-        for goal in professional.goals:
+        existing_goals = (
+            session.query(GoalModel)
+            .filter_by(
+                professional_id=str(
+                    professional.id
+                )
+            )
+            .all()
+        )
 
+        current_goal_ids = {
+            str(goal.id)
+            for goal in professional.goals
+        }
+
+        for existing in existing_goals:
+
+            if existing.id not in current_goal_ids:
+                session.delete(existing)
+
+        for goal in professional.goals:
             session.merge(
                 GoalModel(
                     id=str(goal.id),
@@ -138,13 +177,35 @@ class SQLiteProfessionalRepository(
                     status=goal.status.value,
                 )
             )
-
         # ------------------------------------------------------
         # Achievements
         # ------------------------------------------------------
 
-        for achievement in professional.achievements:
+        # Remove deleted achievements
 
+        existing_achievements = (
+            session.query(AchievementModel)
+            .filter_by(
+                professional_id=str(
+                    professional.id
+                )
+            )
+            .all()
+        )
+
+        current_achievement_ids = {
+            str(achievement.id)
+            for achievement in professional.achievements
+        }
+
+        for existing in existing_achievements:
+
+            if existing.id not in current_achievement_ids:
+                session.delete(existing)
+
+        # Save current achievements
+
+        for achievement in professional.achievements:
             session.merge(
                 AchievementModel(
                     id=str(
@@ -173,13 +234,31 @@ class SQLiteProfessionalRepository(
                     ),
                 )
             )
-
         # ------------------------------------------------------
         # Education
         # ------------------------------------------------------
 
-        for education in professional.educations:
+        existing_educations = (
+            session.query(EducationModel)
+            .filter_by(
+                professional_id=str(
+                    professional.id
+                )
+            )
+            .all()
+        )
 
+        current_ids = {
+            str(education.id)
+            for education in professional.educations
+        }
+
+        for existing in existing_educations:
+
+            if existing.id not in current_ids:
+                session.delete(existing)
+
+        for education in professional.educations:
             session.merge(
                 EducationModel(
                     id=str(
@@ -202,10 +281,29 @@ class SQLiteProfessionalRepository(
                     ),
                 )
             )
-
         # ------------------------------------------------------
         # Experiences
         # ------------------------------------------------------
+
+        existing_experiences = (
+            session.query(ExperienceModel)
+            .filter_by(
+                professional_id=str(
+                    professional.id
+                )
+            )
+            .all()
+        )
+
+        current_ids = {
+            str(experience.id)
+            for experience in professional.experiences
+        }
+
+        for existing in existing_experiences:
+
+            if existing.id not in current_ids:
+                session.delete(existing)
 
         for experience in professional.experiences:
             session.merge(
@@ -238,8 +336,27 @@ class SQLiteProfessionalRepository(
         # Timeline
         # ------------------------------------------------------
 
-        for event in professional.timeline:
+        existing_events = (
+            session.query(TimelineEventModel)
+            .filter_by(
+                professional_id=str(
+                    professional.id
+                )
+            )
+            .all()
+        )
 
+        current_ids = {
+            str(event.id)
+            for event in professional.timeline
+        }
+
+        for existing in existing_events:
+
+            if existing.id not in current_ids:
+                session.delete(existing)
+
+        for event in professional.timeline:
             session.merge(
                 TimelineEventModel(
                     id=str(event.id),
@@ -247,17 +364,135 @@ class SQLiteProfessionalRepository(
                         professional.id
                     ),
                     title=str(event.title),
-                    event_type=(
-                        event.event_type.value
+                    event_type=event.event_type.value,
+                    event_date=event.event_date.value,
+                    description=str(event.description),
+                    reference_id=event.reference_id,
+                )
+            )
+        # ------------------------------------------------------
+        # Skills
+        # ------------------------------------------------------
+
+        existing_skills = (
+            session.query(SkillModel)
+            .filter_by(
+                professional_id=str(
+                    professional.id
+                )
+            )
+            .all()
+        )
+
+        current_ids = {
+            str(skill.id)
+            for skill in professional.skills
+        }
+
+        for existing in existing_skills:
+
+            if existing.id not in current_ids:
+                session.delete(existing)
+
+        for skill in professional.skills:
+            session.merge(
+                SkillModel(
+                    id=str(skill.id),
+                    professional_id=str(
+                        professional.id
                     ),
-                    event_date=(
-                        event.event_date.value
+                    name=skill.name,
+                )
+            )
+        # ------------------------------------------------------
+        # Certificates
+        # ------------------------------------------------------
+
+        # Remove certificates that no longer exist in the aggregate
+
+        existing_certificates = (
+            session.query(CertificateModel)
+            .filter_by(
+                professional_id=str(
+                    professional.id
+                )
+            )
+            .all()
+        )
+
+        current_certificate_ids = {
+            str(certificate.id)
+            for certificate in professional.certificates
+        }
+
+        for existing in existing_certificates:
+
+            if existing.id not in current_certificate_ids:
+                session.delete(existing)
+
+        # Save current certificates
+
+        for certificate in professional.certificates:
+            session.merge(
+                CertificateModel(
+                    id=str(
+                        certificate.id
                     ),
-                    description=str(
-                        event.description
+                    professional_id=str(
+                        professional.id
                     ),
-                    reference_id=(
-                        event.reference_id
+                    name=str(
+                        certificate.name
+                    ),
+                    issuer=str(
+                        certificate.issuer
+                    ),
+                    credential_id=str(
+                        certificate.credential_id
+                    ),
+                    issued_date=certificate.issued_date,
+                    expiry_date=certificate.expiry_date,
+                    verification_url=certificate.verification_url,
+                    status=certificate.status.value,
+                )
+            )
+        # ------------------------------------------------------
+        # Projects
+        # ------------------------------------------------------
+
+        existing_projects = (
+            session.query(ProjectModel)
+            .filter_by(
+                professional_id=str(
+                    professional.id
+                )
+            )
+            .all()
+        )
+
+        current_ids = {
+            str(project.id)
+            for project in professional.projects
+        }
+
+        for existing in existing_projects:
+
+            if existing.id not in current_ids:
+                session.delete(existing)
+
+        for project in professional.projects:
+            session.merge(
+                ProjectModel(
+                    id=str(project.id),
+                    professional_id=str(
+                        professional.id
+                    ),
+                    name=str(project.name),
+                    description=project.description,
+                    repository_url=project.repository_url,
+                    live_url=project.live_url,
+                    technologies=",".join(
+                        project.technologies
                     ),
                 )
             )
@@ -357,12 +592,11 @@ class SQLiteProfessionalRepository(
         )
 
         for achievement_model in achievement_models:
-
             achievement = Achievement(
                 title=AchievementTitle(
                     achievement_model.title
                 ),
-                issuer=Issuer(
+                issuer=AchievementIssuer(
                     achievement_model.issuer
                 ),
                 achievement_type=AchievementType(
@@ -496,6 +730,99 @@ class SQLiteProfessionalRepository(
             professional.add_timeline_event(
                 event
             )
+        # ------------------------------------------------------
+        # Restore Certificates
+        # ------------------------------------------------------
+
+        certificate_models = (
+            session.query(CertificateModel)
+            .filter_by(
+                professional_id=str(professional.id)
+            )
+            .all()
+        )
+
+        for certificate_model in certificate_models:
+            certificate = Certificate(
+                name=CertificateName(
+                    certificate_model.name
+                ),
+                issuer=CertificateIssuer(
+                    certificate_model.issuer
+                ),
+                credential_id=CredentialId(
+                    certificate_model.credential_id
+                ),
+                issued_date=certificate_model.issued_date,
+                expiry_date=certificate_model.expiry_date,
+                verification_url=certificate_model.verification_url,
+                status=CertificateStatus(
+                    certificate_model.status
+                ),
+            )
+            certificate.id = UUID(
+                certificate_model.id
+            )
+
+            professional.add_certificate(
+                certificate
+            )
+        # ------------------------------------------------------
+        # Restore Skills
+        # ------------------------------------------------------
+
+        skill_models = (
+            session.query(SkillModel)
+            .filter_by(
+                professional_id=str(professional.id)
+            )
+            .all()
+        )
+
+        for skill_model in skill_models:
+            skill = Skill(
+                name=skill_model.name,
+            )
+
+            skill.id = UUID(
+                skill_model.id
+            )
+
+            professional.add_skill(skill)
+        # ------------------------------------------------------
+        # Restore Projects
+        # ------------------------------------------------------
+
+        project_models = (
+            session.query(ProjectModel)
+            .filter_by(
+                professional_id=str(professional.id)
+            )
+            .all()
+        )
+
+        for project_model in project_models:
+            project = Project(
+                name=ProjectName(
+                    project_model.name
+                ),
+                description=project_model.description,
+                repository_url=project_model.repository_url,
+                live_url=project_model.live_url,
+                technologies=(
+                    []
+                    if not project_model.technologies
+                    else project_model.technologies.split(",")
+                ),
+            )
+
+            project.id = UUID(
+                project_model.id
+            )
+
+            professional.add_project(
+                project
+            )
 
         # ------------------------------------------------------
         # Finish
@@ -505,3 +832,23 @@ class SQLiteProfessionalRepository(
 
         session.close()
         return professional
+    def delete(
+        self,
+        professional_id: UUID,
+    ) -> None:
+        """
+        Delete a Professional.
+        """
+
+        session = SessionLocal()
+
+        model = session.get(
+            ProfessionalModel,
+            str(professional_id),
+        )
+
+        if model is not None:
+            session.delete(model)
+            session.commit()
+
+        session.close()

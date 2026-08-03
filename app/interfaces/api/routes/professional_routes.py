@@ -81,6 +81,7 @@ from app.interfaces.api.routes.education_routes import router as education_route
 from app.interfaces.api.mappers.professional_mapper import (
     ProfessionalMapper,
 )
+from fastapi import Response
 
 from app.interfaces.api.mappers.achievement_mapper import (
     AchievementMapper,
@@ -93,6 +94,19 @@ from app.interfaces.api.mappers.experience_mapper import (
 from app.interfaces.api.mappers.project_mapper import (
     ProjectMapper,
 )
+from app.interfaces.api.schemas.skill_request import (
+    SkillRequest,
+)
+
+from app.interfaces.api.schemas.skill_response import (
+    SkillResponse,
+)
+
+from app.interfaces.api.mappers.skill_mapper import (
+    SkillMapper,
+)
+
+from app.domain.skill.skill import Skill
 # =============================================================================
 # Domain - Achievement
 # =============================================================================
@@ -178,6 +192,9 @@ from app.domain.project.project import (
 
 from app.domain.project.value_objects.project_name import (
     ProjectName,
+)
+from app.interfaces.api.schemas.update_professional_request import (
+    UpdateProfessionalRequest,
 )
 # =============================================================================
 # Router
@@ -450,13 +467,15 @@ def add_certificate(
         name=CertificateName(
             request.name
         ),
-        issuer=CertificateIssuer(request.issuer),
+        issuer=CertificateIssuer(
+            request.issuer
+        ),
         credential_id=CredentialId(
             request.credential_id
         ),
-        issued_date=date.today(),
-        expiry_date=None,
-        verification_url=request.credential_url,
+        issued_date=request.issued_date,
+        expiry_date=request.expiry_date,
+        verification_url=request.verification_url,
         status=status,
     )
 
@@ -479,13 +498,13 @@ def add_certificate(
         id=str(certificate.id),
         name=str(certificate.name),
         issuer=str(certificate.issuer),
-        credential_id=str(
-            certificate.credential_id
-        ),
-        credential_url=certificate.verification_url,
+        credential_id=str(certificate.credential_id),
+        issued_date=certificate.issued_date,
+        expiry_date=certificate.expiry_date,
+        verification_url=certificate.verification_url,
         status=certificate.status.value,
-        issued_at=certificate.issued_date,
     )
+
 @router.get(
     "/professionals/{professional_id}/certificates",
     response_model=list[CertificateResponse],
@@ -522,9 +541,10 @@ def get_certificates(
             name=str(item.name),
             issuer=str(item.issuer),
             credential_id=str(item.credential_id),
-            credential_url=item.verification_url,
+            issued_date=item.issued_date,
+            expiry_date=item.expiry_date,
+            verification_url=item.verification_url,
             status=item.status.value,
-            issued_at=item.issued_date,
         )
         for item in certificates
     ]
@@ -759,3 +779,214 @@ def get_projects(
 
         for project in projects
     ]
+# =============================================================================
+# Skill Endpoints
+# =============================================================================
+
+@router.post(
+    "/professionals/{professional_id}/skills",
+    response_model=SkillResponse,
+)
+def add_skill(
+    professional_id: str,
+    request: SkillRequest,
+):
+    """
+    Add a Skill to a Professional.
+    """
+
+    try:
+        professional_uuid = UUID(
+            professional_id
+        )
+
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid UUID.",
+        )
+
+    skill = Skill(
+        name=request.name,
+    )
+
+    use_case = (
+        container.add_skill_use_case()
+    )
+
+    professional = use_case.execute(
+        professional_uuid,
+        skill,
+    )
+
+    if professional is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Professional not found.",
+        )
+
+    return SkillMapper.to_response(
+        skill
+    )
+
+
+@router.get(
+    "/professionals/{professional_id}/skills",
+    response_model=list[SkillResponse],
+)
+def get_skills(
+    professional_id: str,
+):
+    """
+    Retrieve all Skills belonging to a Professional.
+    """
+
+    try:
+        professional_uuid = UUID(
+            professional_id
+        )
+
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid UUID.",
+        )
+
+    use_case = (
+        container.get_skills_use_case()
+    )
+
+    skills = use_case.execute(
+        professional_uuid
+    )
+
+    return [
+        SkillMapper.to_response(
+            skill
+        )
+        for skill in skills
+    ]
+
+
+@router.delete(
+    "/professionals/{professional_id}/skills/{skill_id}",
+    status_code=204,
+)
+def remove_skill(
+    professional_id: str,
+    skill_id: str,
+):
+    """
+    Remove a Skill from a Professional.
+    """
+
+    try:
+        professional_uuid = UUID(
+            professional_id
+        )
+
+        skill_uuid = UUID(
+            skill_id
+        )
+
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid UUID.",
+        )
+
+    use_case = (
+        container.remove_skill_use_case()
+    )
+
+    professional = use_case.execute(
+        professional_uuid,
+        skill_uuid,
+    )
+
+    if professional is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Professional not found.",
+        )
+@router.delete(
+    "/professionals/{professional_id}",
+    status_code=204,
+)
+def delete_professional(
+    professional_id: str,
+):
+    """
+    Delete a Professional.
+    """
+
+    try:
+        professional_uuid = UUID(
+            professional_id
+        )
+
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid UUID.",
+        )
+
+    use_case = (
+        container.delete_professional_use_case()
+    )
+
+    try:
+        use_case.execute(
+            professional_uuid
+        )
+
+    except ProfessionalNotFoundException:
+        raise HTTPException(
+            status_code=404,
+            detail="Professional not found.",
+        )
+
+    return
+@router.patch(
+    "/professionals/{professional_id}",
+    response_model=ProfessionalResponse,
+)
+def update_professional(
+    professional_id: str,
+    request: UpdateProfessionalRequest,
+):
+
+    professional = (
+        container.update_professional_use_case()
+        .execute(
+            UUID(professional_id),
+            request.full_name,
+            request.primary_goal,
+        )
+    )
+
+    return ProfessionalResponse(
+        id=str(professional.id),
+        full_name=str(
+            professional.full_name
+        ),
+        primary_goal=professional.primary_goal,
+        created_at=professional.created_at,
+    )
+
+
+@router.delete(
+    "/professionals/{professional_id}",
+    status_code=204,
+)
+def delete_professional(
+    professional_id: str,
+):
+
+    container.delete_professional_use_case().execute(
+        UUID(professional_id)
+    )
+
+    return Response(
+        status_code=204
+    )

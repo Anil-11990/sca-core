@@ -1,12 +1,153 @@
 """
 Application Composition Root.
 
-Responsible for constructing the application's
-dependencies.
+Responsibility:
+----------------
 
-Only this module should know which concrete
-implementations are used.
+This file creates and connects all application dependencies.
+
+The Container knows:
+
+    - Which repository implementation to use
+    - Which Use Case needs which repository
+    - How objects are constructed
+
+The Container DOES NOT:
+
+    - Contain business rules
+    - Modify domain objects
+    - Handle API requests
+
+
+Architecture:
+
+        FastAPI Routes
+              |
+              |
+              v
+          Container
+              |
+              |
+              v
+          Use Cases
+              |
+              |
+              v
+        Repositories
+              |
+              |
+              v
+           Domain
+
+
+This is the only place where concrete
+implementations are selected.
+
+Example:
+
+SQLiteProfessionalRepository
+
+can later be replaced with:
+
+PostgresProfessionalRepository
+
+without changing the API layer.
 """
+
+
+# =============================================================================
+# Infrastructure
+# =============================================================================
+
+from app.infrastructure.repositories.sqlite_professional_repository import (
+    SQLiteProfessionalRepository,
+)
+
+
+# =============================================================================
+# Application Use Cases
+# =============================================================================
+
+
+# Professional
+from app.application.use_cases.create_professional import (
+    CreateProfessional,
+)
+
+from app.application.use_cases.get_professional import (
+    GetProfessional,
+)
+from app.application.use_cases.update_professional import UpdateProfessional
+from app.application.use_cases.delete_professional import DeleteProfessional
+
+
+# Achievement
+from app.application.use_cases.add_achievement import (
+    AddAchievement,
+)
+
+from app.application.use_cases.get_achievements import (
+    GetAchievements,
+)
+from app.application.use_cases.update_achievement import (
+    UpdateAchievement,
+)
+
+from app.application.use_cases.remove_achievement import (
+    RemoveAchievement,
+)
+
+
+# Certificate
+from app.application.use_cases.add_certificate import (
+    AddCertificate,
+)
+
+from app.application.use_cases.get_certificates import (
+    GetCertificates,
+)
+from app.application.use_cases.update_certificate import (
+    UpdateCertificate,
+)
+
+from app.application.use_cases.remove_certificate import (
+    RemoveCertificate,
+)
+
+# Education
+from app.application.use_cases.add_education import (
+    AddEducation,
+)
+
+from app.application.use_cases.get_education import (
+    GetEducation,
+)
+
+from app.application.use_cases.remove_education import (
+    RemoveEducation,
+)
+
+from app.application.use_cases.update_education import (
+    UpdateEducation,
+)
+
+# Goal
+from app.application.use_cases.add_goal import (
+    AddGoalUseCase,
+)
+
+from app.application.use_cases.get_goals import (
+    GetGoalsUseCase,
+)
+
+from app.application.use_cases.remove_goal import (
+    RemoveGoalUseCase,
+)
+
+from app.application.use_cases.update_goal import (
+    UpdateGoalUseCase,
+)
+# Experience
 from app.application.use_cases.add_experience import (
     AddExperienceUseCase,
 )
@@ -14,11 +155,51 @@ from app.application.use_cases.add_experience import (
 from app.application.use_cases.get_experiences import (
     GetExperiencesUseCase,
 )
-from app.application.use_cases.create_professional import CreateProfessional
-from app.application.use_cases.get_professional import GetProfessional
-from app.infrastructure.repositories.memory_professional_repository import (
-    MemoryProfessionalRepository,)
-from app.application.use_cases.add_project import (AddProject,)
+from app.application.use_cases.remove_experience import (
+    RemoveExperience,
+)
+
+from app.application.use_cases.update_experience import (
+    UpdateExperience,
+)
+
+
+# Project
+from app.application.use_cases.add_project import (
+    AddProject,
+)
+
+from app.application.use_cases.get_projects import (
+    GetProjects,
+)
+
+from app.application.use_cases.update_project import (
+    UpdateProject,
+)
+
+from app.application.use_cases.remove_project import (
+    RemoveProject,
+)
+
+# Skill
+from app.application.use_cases.add_skill import (
+    AddSkillUseCase,
+)
+
+from app.application.use_cases.get_skills import (
+    GetSkillsUseCase,
+)
+from app.application.use_cases.update_skill import (
+    UpdateSkill,
+)
+
+from app.application.use_cases.remove_skill import (
+    RemoveSkill,
+    RemoveSkillUseCase,
+)
+
+
+# Timeline
 from app.application.use_cases.add_timeline_event import (
     AddTimelineEventUseCase,
 )
@@ -30,161 +211,578 @@ from app.application.use_cases.get_timeline_events import (
 from app.application.use_cases.remove_timeline_event import (
     RemoveTimelineEventUseCase,
 )
-from app.application.use_cases.get_projects import (GetProjects,)
-from app.application.use_cases.add_achievement import AddAchievement
-from app.application.use_cases.get_achievements import GetAchievements
-from app.application.use_cases.add_certificate import AddCertificate
-from app.application.use_cases.get_certificates import GetCertificates
+from app.application.use_cases.update_timeline_event import (
+    UpdateTimelineEvent,
+)
+
+
+
+# =============================================================================
+# Container Class
+# =============================================================================
+
+
 class Container:
     """
-    Builds and provides application services.
+    Dependency Injection Container.
+
+    Creates application services.
+
+    A single repository instance is shared
+    between all use cases.
     """
 
-    def __init__(self) -> None:
-        # Shared repository instance.
-        self.professional_repository = MemoryProfessionalRepository()
 
-    def create_professional_use_case(self) -> CreateProfessional:
+    # -------------------------------------------------------------------------
+    # Constructor
+    # -------------------------------------------------------------------------
+
+    def __init__(self):
+
         """
-        Creates the CreateProfessional use case.
+        Create shared infrastructure dependencies.
+
+        Currently:
+
+            SQLite Repository
+
+        Later:
+
+            PostgreSQL Repository
+            Mongo Repository
+            Cloud Database
+        """
+
+
+        self.professional_repository = (
+            SQLiteProfessionalRepository()
+        )
+
+
+
+    # =========================================================================
+    # Professional Use Cases
+    # =========================================================================
+
+
+    def create_professional_use_case(
+        self,
+    ) -> CreateProfessional:
+
+        """
+        Build CreateProfessional use case.
         """
 
         return CreateProfessional(
             repository=self.professional_repository
         )
 
-    def get_professional_use_case(self) -> GetProfessional:
+
+
+    def get_professional_use_case(
+        self,
+    ) -> GetProfessional:
+
         """
-        Creates the GetProfessional use case.
+        Build GetProfessional use case.
         """
 
         return GetProfessional(
             repository=self.professional_repository
         )
 
-    def add_achievement_use_case(self) -> AddAchievement:
+    def update_professional_use_case(
+            self,
+    ) -> UpdateProfessional:
+        return UpdateProfessional(
+            repository=self.professional_repository
+        )
+
+    def delete_professional_use_case(
+            self,
+    ) -> DeleteProfessional:
+        return DeleteProfessional(
+            repository=self.professional_repository
+        )
+
+
+    # =========================================================================
+    # Achievement Use Cases
+    # =========================================================================
+
+
+    def add_achievement_use_case(
+        self,
+    ) -> AddAchievement:
+
         """
-        Creates the AddAchievement use case.
+        Build AddAchievement use case.
         """
 
         return AddAchievement(
             repository=self.professional_repository
         )
 
-    def get_achievements_use_case(self) -> GetAchievements:
+
+
+    def get_achievements_use_case(
+        self,
+    ) -> GetAchievements:
+
         """
-        Creates the GetAchievements use case.
+        Build GetAchievements use case.
         """
 
         return GetAchievements(
             repository=self.professional_repository
         )
 
-    def add_certificate_use_case(
+    def update_achievement_use_case(
             self,
-    ) -> AddCertificate:
+    ) -> UpdateAchievement:
         """
-        Creates the AddCertificate use case.
+        Build UpdateAchievement use case.
+        """
+        return UpdateAchievement(
+            repository=self.professional_repository
+        )
+
+    def remove_achievement_use_case(
+            self,
+    ) -> RemoveAchievement:
+        """
+        Build RemoveAchievement use case.
+        """
+        return RemoveAchievement(
+            repository=self.professional_repository
+        )
+
+
+
+    # =========================================================================
+    # Certificate Use Cases
+    # =========================================================================
+
+
+    def add_certificate_use_case(
+        self,
+    ) -> AddCertificate:
+
+        """
+        Build AddCertificate use case.
         """
 
         return AddCertificate(
-            repository=self.professional_repository,
+            repository=self.professional_repository
         )
 
+
+
     def get_certificates_use_case(
-            self,
+        self,
     ) -> GetCertificates:
+
         """
-        Creates the GetCertificates use case.
+        Build GetCertificates use case.
         """
 
         return GetCertificates(
-            repository=self.professional_repository,
+            repository=self.professional_repository
         )
 
-    def add_experience_use_case(
+    def update_certificate_use_case(
             self,
-    ):
+    ) -> UpdateCertificate:
         """
-        Build AddExperienceUseCase.
+        Build UpdateCertificate use case.
+        """
+
+        return UpdateCertificate(
+            repository=self.professional_repository
+        )
+
+    def remove_certificate_use_case(
+            self,
+    ) -> RemoveCertificate:
+        """
+        Build RemoveCertificate use case.
+        """
+
+        return RemoveCertificate(
+            repository=self.professional_repository
+        )
+
+    # =========================================================================
+    # Education Use Cases
+    # =========================================================================
+
+
+    def add_education_use_case(
+        self,
+    ) -> AddEducation:
+
+        """
+        Build AddEducation use case.
+        """
+
+        return AddEducation(
+            repository=self.professional_repository
+        )
+
+
+    def get_education_use_case(
+        self,
+    ) -> GetEducation:
+
+        """
+        Build GetEducation use case.
+        """
+
+        return GetEducation(
+            repository=self.professional_repository
+        )
+
+
+    def remove_education_use_case(
+        self,
+    ) -> RemoveEducation:
+
+        """
+        Build RemoveEducation use case.
+        """
+
+        return RemoveEducation(
+            repository=self.professional_repository
+        )
+
+
+    def update_education_use_case(
+        self,
+    ) -> UpdateEducation:
+
+        """
+        Build UpdateEducation use case.
+        """
+
+        return UpdateEducation(
+            repository=self.professional_repository
+        )
+
+    # =========================================================================
+    # Goal Use Cases
+    # =========================================================================
+
+    def add_goal_use_case(
+            self,
+    ) -> AddGoalUseCase:
+        """
+        Build AddGoal use case.
+        """
+
+        return AddGoalUseCase(
+            repository=self.professional_repository
+        )
+
+    def get_goals_use_case(
+        self,
+    ) -> GetGoalsUseCase:
+
+        """
+        Build GetGoals use case.
+        """
+
+        return GetGoalsUseCase(
+            repository=self.professional_repository
+        )
+
+    def update_goal_use_case(
+        self,
+    ) -> UpdateGoalUseCase:
+
+        """
+        Build UpdateGoal use case.
+        """
+
+        return UpdateGoalUseCase(
+            repository=self.professional_repository
+        )
+
+
+    def remove_goal_use_case(
+        self,
+    ) -> RemoveGoalUseCase:
+
+        """
+        Build RemoveGoal use case.
+        """
+
+        return RemoveGoalUseCase(
+            repository=self.professional_repository
+        )
+
+    # =========================================================================
+    # Experience Use Cases
+    # =========================================================================
+
+
+    def add_experience_use_case(
+        self,
+    ) -> AddExperienceUseCase:
+
+        """
+        Build AddExperience use case.
         """
 
         return AddExperienceUseCase(
-            self.professional_repository
+            repository=self.professional_repository
         )
 
+
+
     def get_experiences_use_case(
-            self,
-    ):
+        self,
+    ) -> GetExperiencesUseCase:
+
         """
-        Build GetExperiencesUseCase.
+        Build GetExperiences use case.
         """
 
         return GetExperiencesUseCase(
-            self.professional_repository
+            repository=self.professional_repository
+        )
+    def remove_experience_use_case(
+        self,
+    ) -> RemoveExperience:
+
+        """
+        Build RemoveExperience use case.
+        """
+
+        return RemoveExperience(
+            repository=self.professional_repository
         )
 
+
+
+    def update_experience_use_case(
+        self,
+    ) -> UpdateExperience:
+
+        """
+        Build UpdateExperience use case.
+        """
+
+        return UpdateExperience(
+            repository=self.professional_repository
+        )
+
+
+
+    # =========================================================================
+    # Project Use Cases
+    # =========================================================================
+
+
     def add_project_use_case(
-            self,
-    ):
+        self,
+    ) -> AddProject:
+
         """
         Build AddProject use case.
         """
 
         return AddProject(
-            self.professional_repository
+            repository=self.professional_repository
         )
 
+
+
     def get_projects_use_case(
-            self,
-    ):
+        self,
+    ) -> GetProjects:
+
         """
         Build GetProjects use case.
         """
 
         return GetProjects(
-            self.professional_repository
+            repository=self.professional_repository
         )
-    # -------------------------------------------------------------------------
+    def update_project_use_case(
+        self,
+    ) -> UpdateProject:
+        """
+        Build UpdateProject use case.
+        """
+        return UpdateProject(
+            repository=self.professional_repository
+        )
+
+
+    def remove_project_use_case(
+        self,
+    ) -> RemoveProject:
+        """
+        Build RemoveProject use case.
+        """
+        return RemoveProject(
+            repository=self.professional_repository
+        )
+
+
+    # =========================================================================
+    # Skill Use Cases
+    # =========================================================================
+
+
+    def add_skill_use_case(
+        self,
+    ) -> AddSkillUseCase:
+
+        """
+        Build AddSkill use case.
+
+        IMPORTANT:
+
+        Do NOT write:
+
+            self.professional_repository()
+
+        because repository is already an object.
+
+        Wrong:
+
+            SQLiteRepository()
+
+        Correct:
+
+            SQLiteRepository
+        """
+
+
+        return AddSkillUseCase(
+            repository=self.professional_repository
+        )
+
+
+
+    def get_skills_use_case(
+        self,
+    ) -> GetSkillsUseCase:
+
+        """
+        Build GetSkills use case.
+        """
+
+
+        return GetSkillsUseCase(
+            repository=self.professional_repository
+        )
+
+    def update_skill_use_case(
+            self,
+    ) -> UpdateSkill:
+        """
+        Build UpdateSkill use case.
+        """
+
+        return UpdateSkill(
+            repository=self.professional_repository
+        )
+
+    def remove_skill_use_case(
+            self,
+    ) -> RemoveSkillUseCase:
+        """
+        Build RemoveSkill use case.
+        """
+
+        return RemoveSkillUseCase(
+            repository=self.professional_repository
+        )
+
+
+    # =========================================================================
     # Timeline Use Cases
-    # -------------------------------------------------------------------------
+    # =========================================================================
+
 
     def add_timeline_event_use_case(
         self,
     ) -> AddTimelineEventUseCase:
+
         """
         Build AddTimelineEvent use case.
         """
+
 
         return AddTimelineEventUseCase(
             repository=self.professional_repository
         )
 
 
+
     def get_timeline_events_use_case(
         self,
     ) -> GetTimelineEventsUseCase:
+
         """
         Build GetTimelineEvents use case.
         """
+
 
         return GetTimelineEventsUseCase(
             repository=self.professional_repository
         )
 
 
+
     def remove_timeline_event_use_case(
         self,
     ) -> RemoveTimelineEventUseCase:
+
         """
         Build RemoveTimelineEvent use case.
         """
 
+
         return RemoveTimelineEventUseCase(
             repository=self.professional_repository
         )
-# -----------------------------------------------------------------------------
-# Global Dependency Container
-# -----------------------------------------------------------------------------
+
+    def update_timeline_event_use_case(
+            self,
+    ) -> UpdateTimelineEvent:
+        """
+        Build UpdateTimelineEvent use case.
+        """
+
+        return UpdateTimelineEvent(
+            repository=self.professional_repository
+        )
+
+
+
+# =============================================================================
+# Global Container Instance
+# =============================================================================
+
+"""
+The API imports this object:
+
+from app.bootstrap.container import container
+
+Example:
+
+container.add_skill_use_case()
+
+creates:
+
+AddSkillUseCase(
+    SQLiteProfessionalRepository
+)
+
+"""
+
 
 container = Container()

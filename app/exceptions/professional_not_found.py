@@ -1,18 +1,27 @@
 """
-Raised when a Professional cannot be found.
+Professional Not Found Exception.
+
+Raised when a Professional
+cannot be found in the system.
 """
 
 
 class ProfessionalNotFoundException(Exception):
     """
-    Raised when a Professional does not exist.
+    Domain/Application exception.
+
+    Used when searching for a Professional
+    that does not exist.
     """
+
 
     def __init__(
         self,
-        professional_id: str,
+        professional_id,
     ):
 
+        self.professional_id = professional_id
+
         super().__init__(
-            f"Professional '{professional_id}' was not found."
+            f"Professional with id {professional_id} was not found."
         )

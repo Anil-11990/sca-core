@@ -189,19 +189,37 @@ class Professional(Entity):
     # =========================================================================
 
     def add_skill(
-        self,
-        skill: Skill,
+            self,
+            skill: Skill,
     ) -> None:
         """
-        Adds a Skill.
-
-        Duplicate skills are ignored.
+        Adds a skill to the Professional.
         """
 
-        if skill in self._skills:
-            return
+        if skill not in self._skills:
+            self._skills.append(skill)
 
-        self._skills.append(skill)
+    def remove_skill(
+            self,
+            skill_id,
+    ) -> None:
+        """
+        Removes a Skill by its identifier.
+        """
+
+        self._skills = [
+            skill
+            for skill in self._skills
+            if skill.id != skill_id
+        ]
+
+    def get_skills(
+            self,
+    ) -> tuple[Skill, ...]:
+        """
+        Returns all professional skills.
+        """
+        return tuple(self._skills)
 
     # =========================================================================
     # Goal Operations
@@ -222,6 +240,29 @@ class Professional(Entity):
 
         self._goals.append(goal)
 
+    def remove_goal(
+            self,
+            goal_id,
+    ) -> None:
+        """
+        Removes a Goal from the Professional.
+        """
+
+        self._goals = [
+            goal
+            for goal in self._goals
+            if goal.id != goal_id
+        ]
+
+    def get_goals(
+            self,
+    ) -> tuple[Goal, ...]:
+        """
+        Returns all professional goals.
+        """
+        return tuple(self._goals)
+
+
     # =========================================================================
     # Achievement Operations
     # =========================================================================
@@ -241,6 +282,28 @@ class Professional(Entity):
 
         self._achievements.append(achievement)
 
+    def remove_achievement(
+            self,
+            achievement_id,
+    ) -> None:
+        """
+        Removes an Achievement.
+        """
+
+        self._achievements = [
+            achievement
+            for achievement in self._achievements
+            if achievement.id != achievement_id
+        ]
+
+    def get_achievements(
+            self,
+    ) -> tuple[Achievement, ...]:
+        """
+        Returns all achievements.
+        """
+        return tuple(self._achievements)
+
     # =========================================================================
     # Certificate Operations
     # =========================================================================
@@ -259,6 +322,29 @@ class Professional(Entity):
             return
 
         self._certificates.append(certificate)
+
+    def remove_certificate(
+            self,
+            certificate_id,
+    ) -> None:
+        """
+        Removes a Certificate.
+        """
+
+        self._certificates = [
+            certificate
+            for certificate in self._certificates
+            if certificate.id != certificate_id
+        ]
+
+    def get_certificates(
+            self,
+    ) -> tuple[Certificate, ...]:
+        """
+        Returns all certificates.
+        """
+        return tuple(self._certificates)
+
 
     # =========================================================================
     # Experience Operations
@@ -343,6 +429,15 @@ class Professional(Entity):
             if project.id != project_id
         ]
 
+    def get_projects(
+            self,
+    ) -> tuple[Project, ...]:
+        """
+        Returns all projects.
+        """
+        return tuple(self.projects)
+
+
     # =========================================================================
     # Education Operations
     # =========================================================================
@@ -391,6 +486,11 @@ class Professional(Entity):
                 return education
 
         return None
+
+    #== == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == =
+
+    # timeline_event operation
+    # =========================================================================
 
     def add_timeline_event(
             self,

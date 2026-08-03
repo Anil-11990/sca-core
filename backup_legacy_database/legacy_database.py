@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 
-from app.infrastructure.database.models import Base
+from app.infrastructure.database.legacy_models import Base
 
 DATABASE_URL = "sqlite:///sca.db"
 

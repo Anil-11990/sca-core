@@ -1,16 +1,13 @@
-"""
-Application Use Case:
-Add Skill
-"""
+from uuid import UUID
 
 from app.domain.professional.professional import Professional
 from app.domain.skill.skill import Skill
+from app.exceptions.professional_not_found import ProfessionalNotFoundException
 
 
 class AddSkill:
     """
-    Application use case for adding a skill
-    to a Professional.
+    Original application use case used by unit tests.
     """
 
     def execute(
@@ -18,18 +15,31 @@ class AddSkill:
         professional: Professional,
         skill: Skill,
     ) -> None:
-        """
-        Purpose:
-            Adds a skill to the Professional.
+        professional.add_skill(skill)
 
-        Business Rule:
-            Delegates the operation to the
-            Professional aggregate.
 
-        Future:
-            Repository persistence,
-            domain events,
-            audit logging.
-        """
+class AddSkillUseCase:
+    """
+    Repository-backed use case used by the API.
+    """
+
+    def __init__(self, repository):
+        self._repository = repository
+
+    def execute(
+        self,
+        professional_id: UUID,
+        skill: Skill,
+    ):
+        professional = self._repository.get_by_id(
+            professional_id
+        )
+
+        if professional is None:
+            raise ProfessionalNotFoundException()
 
         professional.add_skill(skill)
+
+        self._repository.save(professional)
+
+        return professional

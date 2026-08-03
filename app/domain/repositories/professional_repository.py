@@ -40,3 +40,12 @@ class ProfessionalRepository(ABC):
         Retrieve a Professional by ID.
         """
         raise NotImplementedError
+    @abstractmethod
+    def delete(
+        self,
+        professional_id: UUID,
+    ) -> None:
+        """
+        Delete a Professional aggregate.
+        """
+        raise NotImplementedError

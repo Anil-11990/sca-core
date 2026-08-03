@@ -2,6 +2,8 @@
 Certificate Request DTO.
 """
 
+from datetime import date
+
 from pydantic import BaseModel
 
 
@@ -13,5 +15,7 @@ class CertificateRequest(BaseModel):
     name: str
     issuer: str
     credential_id: str
-    credential_url: str
+    issued_date: date
+    expiry_date: date | None = None
+    verification_url: str = ""
     status: str

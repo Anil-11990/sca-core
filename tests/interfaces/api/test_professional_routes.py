@@ -198,7 +198,9 @@ def test_add_certificate():
             "name": "AWS Developer",
             "issuer": "Amazon",
             "credential_id": "AWS-001",
-            "credential_url": "",
+            "issued_date": str(date.today()),
+            "expiry_date": None,
+            "verification_url": "",
             "status": "active",
         },
     )

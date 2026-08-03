@@ -23,13 +23,13 @@ class Education:
     - completion status
     """
 
-
     def __init__(
-        self,
-        institution: str | InstitutionName,
-        degree_level: DegreeLevel,
-        field_of_study: str,
-        graduation_status: GraduationStatus,
+            self,
+            institution: str | InstitutionName,
+            degree_level: DegreeLevel,
+            field_of_study: str,
+            graduation_status: GraduationStatus,
+            id: UUID | None = None,
     ):
 
         if isinstance(institution, str):
@@ -54,7 +54,7 @@ class Education:
             )
 
 
-        self.id: UUID = uuid4()
+        self.id = id or uuid4()
 
         self.institution = institution
 

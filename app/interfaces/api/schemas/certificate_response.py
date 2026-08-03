@@ -2,7 +2,7 @@
 Certificate Response DTO.
 """
 
-from datetime import datetime
+from datetime import date
 
 from pydantic import BaseModel
 
@@ -16,6 +16,7 @@ class CertificateResponse(BaseModel):
     name: str
     issuer: str
     credential_id: str
-    credential_url: str
+    issued_date: date
+    expiry_date: date | None
+    verification_url: str
     status: str
-    issued_at: datetime
