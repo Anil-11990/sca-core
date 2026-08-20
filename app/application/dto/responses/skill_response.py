@@ -7,9 +7,12 @@ from dataclasses import dataclass
 
 @dataclass(slots=True, frozen=True)
 class SkillResponse:
+    """
+    Immutable response DTO for Skill.
+    """
 
     id: str
 
-    skill_name: str
+    name: str
 
     proficiency: str

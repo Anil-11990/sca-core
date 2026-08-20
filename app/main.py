@@ -9,6 +9,6 @@ This file simply exposes the FastAPI application defined inside
 interfaces/api/main.py.
 """
 
-from app.interfaces.api.main import app
+from app.api.main import app
 
 __all__ = ["app"]

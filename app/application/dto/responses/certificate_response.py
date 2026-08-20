@@ -3,11 +3,14 @@ Response DTO for Certificate.
 """
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date
 
 
 @dataclass(slots=True, frozen=True)
 class CertificateResponse:
+    """
+    Immutable response DTO for Certificate.
+    """
 
     id: str
 
@@ -15,10 +18,12 @@ class CertificateResponse:
 
     issuer: str
 
-    status: str
-
     credential_id: str
 
-    credential_url: str
+    status: str
 
-    issued_at: datetime
+    verification_url: str
+
+    issued_date: date
+
+    expiry_date: date | None
