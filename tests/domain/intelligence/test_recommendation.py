@@ -29,3 +29,18 @@ def test_empty_action_is_invalid():
 
     else:
         assert False
+def test_each_recommendation_gets_unique_id():
+
+    first = Recommendation(
+        action="Learn Python",
+        reason="Python is important for AI development.",
+        priority="High",
+    )
+
+    second = Recommendation(
+        action="Learn Docker",
+        reason="Docker improves deployment skills.",
+        priority="Medium",
+    )
+
+    assert first.id != second.id

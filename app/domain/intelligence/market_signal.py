@@ -4,7 +4,7 @@ Market Signal Domain Object.
 Represents external career market information.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from uuid import UUID, uuid4
 
 
@@ -19,7 +19,7 @@ class MarketSignal:
     trend: str
     source: str
 
-    id: UUID = uuid4()
+    id: UUID = field(default_factory=uuid4)
 
     def __post_init__(self) -> None:
 

@@ -29,3 +29,18 @@ def test_empty_title_is_invalid():
 
     else:
         assert False
+def test_each_career_insight_gets_unique_id():
+
+    first = CareerInsight(
+        title="First",
+        description="First insight",
+        category="Skills",
+    )
+
+    second = CareerInsight(
+        title="Second",
+        description="Second insight",
+        category="Projects",
+    )
+
+    assert first.id != second.id

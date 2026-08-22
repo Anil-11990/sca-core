@@ -5,7 +5,7 @@ Represents an intelligence observation
 about a Professional career profile.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from uuid import UUID, uuid4
 
 
@@ -19,7 +19,7 @@ class CareerInsight:
     description: str
     category: str
 
-    id: UUID = uuid4()
+    id: UUID = field(default_factory=uuid4)
 
     def __post_init__(self) -> None:
         self.title = self.title.strip()
