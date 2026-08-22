@@ -5,7 +5,10 @@ Generate Career Insights
 
 from uuid import UUID
 
-from app.domain.intelligence.career_insight import CareerInsight
+from app.domain.intelligence.career_insight import (
+    CareerInsight,
+)
+
 from app.exceptions.professional_not_found import (
     ProfessionalNotFoundException,
 )
@@ -41,10 +44,15 @@ class GenerateCareerInsights:
             raise ProfessionalNotFoundException()
 
 
-        insights = []
+        insights: list[CareerInsight] = []
 
+
+        # =====================================================================
+        # Skills
+        # =====================================================================
 
         if len(professional.skills) >= 3:
+
             insights.append(
                 CareerInsight(
                     title="Strong Skill Foundation",
@@ -56,14 +64,45 @@ class GenerateCareerInsights:
                 )
             )
 
+        else:
+
+            insights.append(
+                CareerInsight(
+                    title="Limited Skill Evidence",
+                    description=(
+                        "Professional currently has "
+                        "limited technical skill evidence."
+                    ),
+                    category="Skills",
+                )
+            )
+
+
+        # =====================================================================
+        # Projects
+        # =====================================================================
 
         if len(professional.projects) > 0:
+
             insights.append(
                 CareerInsight(
                     title="Project Experience Available",
                     description=(
                         "Professional has practical "
                         "project evidence."
+                    ),
+                    category="Projects",
+                )
+            )
+
+        else:
+
+            insights.append(
+                CareerInsight(
+                    title="Limited Project Evidence",
+                    description=(
+                        "Professional currently has "
+                        "no practical project evidence."
                     ),
                     category="Projects",
                 )

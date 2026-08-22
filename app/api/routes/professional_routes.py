@@ -16,12 +16,10 @@ Business rules belong in the Domain layer.
 # Standard Library
 # =============================================================================
 
-from datetime import date
+
 from uuid import UUID
 
-from app.exceptions.professional_not_found import (
-    ProfessionalNotFoundException,
-)
+
 
 # =============================================================================
 # Third Party
@@ -73,15 +71,9 @@ from app.api.schemas.project_request import (
 from app.api.schemas.project_response import (
     ProjectResponse,
 )
-from app.api.routes.education_routes import router as education_router
 # =============================================================================
 # API Mappers
 # =============================================================================
-
-from app.api.mappers.professional_mapper import (
-    ProfessionalMapper,
-)
-from fastapi import Response
 
 from app.api.mappers.achievement_mapper import (
     AchievementMapper,
@@ -202,9 +194,6 @@ from app.api.schemas.update_professional_request import (
 
 router = APIRouter()
 
-router.include_router(
-    education_router
-)
 
 
 # =============================================================================
@@ -594,16 +583,8 @@ def add_experience(
         )
 
     period = ExperiencePeriod(
-        start_date=date.fromisoformat(
-            request.start_date
-        ),
-        end_date=(
-            date.fromisoformat(
-                request.end_date
-            )
-            if request.end_date
-            else None
-        ),
+        start_date=request.start_date,
+        end_date=request.end_date,
     )
 
     experience = Experience(
@@ -975,18 +956,3 @@ def update_professional(
     )
 
 
-@router.delete(
-    "/professionals/{professional_id}",
-    status_code=204,
-)
-def delete_professional(
-    professional_id: str,
-):
-
-    container.delete_professional_use_case().execute(
-        UUID(professional_id)
-    )
-
-    return Response(
-        status_code=204
-    )

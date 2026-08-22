@@ -17,43 +17,7 @@ The Container DOES NOT:
     - Contain business rules
     - Modify domain objects
     - Handle API requests
-
-
-Architecture:
-
-        FastAPI Routes
-              |
-              |
-              v
-          Container
-              |
-              |
-              v
-          Use Cases
-              |
-              |
-              v
-        Repositories
-              |
-              |
-              v
-           Domain
-
-
-This is the only place where concrete
-implementations are selected.
-
-Example:
-
-SQLiteProfessionalRepository
-
-can later be replaced with:
-
-PostgresProfessionalRepository
-
-without changing the API layer.
 """
-
 
 # =============================================================================
 # Infrastructure
@@ -68,8 +32,10 @@ from app.infrastructure.repositories.sqlite_professional_repository import (
 # Application Use Cases
 # =============================================================================
 
-
+# -----------------------------------------------------------------------------
 # Professional
+# -----------------------------------------------------------------------------
+
 from app.application.use_cases.create_professional import (
     CreateProfessional,
 )
@@ -77,11 +43,20 @@ from app.application.use_cases.create_professional import (
 from app.application.use_cases.get_professional import (
     GetProfessional,
 )
-from app.application.use_cases.update_professional import UpdateProfessional
-from app.application.use_cases.delete_professional import DeleteProfessional
+
+from app.application.use_cases.update_professional import (
+    UpdateProfessional,
+)
+
+from app.application.use_cases.delete_professional import (
+    DeleteProfessional,
+)
 
 
+# -----------------------------------------------------------------------------
 # Achievement
+# -----------------------------------------------------------------------------
+
 from app.application.use_cases.add_achievement import (
     AddAchievement,
 )
@@ -89,6 +64,7 @@ from app.application.use_cases.add_achievement import (
 from app.application.use_cases.get_achievements import (
     GetAchievements,
 )
+
 from app.application.use_cases.update_achievement import (
     UpdateAchievement,
 )
@@ -98,7 +74,10 @@ from app.application.use_cases.remove_achievement import (
 )
 
 
+# -----------------------------------------------------------------------------
 # Certificate
+# -----------------------------------------------------------------------------
+
 from app.application.use_cases.add_certificate import (
     AddCertificate,
 )
@@ -106,6 +85,7 @@ from app.application.use_cases.add_certificate import (
 from app.application.use_cases.get_certificates import (
     GetCertificates,
 )
+
 from app.application.use_cases.update_certificate import (
     UpdateCertificate,
 )
@@ -114,7 +94,11 @@ from app.application.use_cases.remove_certificate import (
     RemoveCertificate,
 )
 
+
+# -----------------------------------------------------------------------------
 # Education
+# -----------------------------------------------------------------------------
+
 from app.application.use_cases.add_education import (
     AddEducation,
 )
@@ -123,15 +107,19 @@ from app.application.use_cases.get_education import (
     GetEducation,
 )
 
-from app.application.use_cases.remove_education import (
-    RemoveEducation,
-)
-
 from app.application.use_cases.update_education import (
     UpdateEducation,
 )
 
+from app.application.use_cases.remove_education import (
+    RemoveEducation,
+)
+
+
+# -----------------------------------------------------------------------------
 # Goal
+# -----------------------------------------------------------------------------
+
 from app.application.use_cases.add_goal import (
     AddGoalUseCase,
 )
@@ -140,14 +128,19 @@ from app.application.use_cases.get_goals import (
     GetGoalsUseCase,
 )
 
+from app.application.use_cases.update_goal import (
+    UpdateGoalUseCase,
+)
+
 from app.application.use_cases.remove_goal import (
     RemoveGoalUseCase,
 )
 
-from app.application.use_cases.update_goal import (
-    UpdateGoalUseCase,
-)
+
+# -----------------------------------------------------------------------------
 # Experience
+# -----------------------------------------------------------------------------
+
 from app.application.use_cases.add_experience import (
     AddExperienceUseCase,
 )
@@ -155,16 +148,20 @@ from app.application.use_cases.add_experience import (
 from app.application.use_cases.get_experiences import (
     GetExperiencesUseCase,
 )
-from app.application.use_cases.remove_experience import (
-    RemoveExperience,
-)
 
 from app.application.use_cases.update_experience import (
     UpdateExperience,
 )
 
+from app.application.use_cases.remove_experience import (
+    RemoveExperience,
+)
 
+
+# -----------------------------------------------------------------------------
 # Project
+# -----------------------------------------------------------------------------
+
 from app.application.use_cases.add_project import (
     AddProject,
 )
@@ -181,7 +178,11 @@ from app.application.use_cases.remove_project import (
     RemoveProject,
 )
 
+
+# -----------------------------------------------------------------------------
 # Skill
+# -----------------------------------------------------------------------------
+
 from app.application.use_cases.add_skill import (
     AddSkillUseCase,
 )
@@ -189,17 +190,20 @@ from app.application.use_cases.add_skill import (
 from app.application.use_cases.get_skills import (
     GetSkillsUseCase,
 )
+
 from app.application.use_cases.update_skill import (
     UpdateSkill,
 )
 
 from app.application.use_cases.remove_skill import (
-    RemoveSkill,
     RemoveSkillUseCase,
 )
 
 
+# -----------------------------------------------------------------------------
 # Timeline
+# -----------------------------------------------------------------------------
+
 from app.application.use_cases.add_timeline_event import (
     AddTimelineEventUseCase,
 )
@@ -208,14 +212,47 @@ from app.application.use_cases.get_timeline_events import (
     GetTimelineEventsUseCase,
 )
 
-from app.application.use_cases.remove_timeline_event import (
-    RemoveTimelineEventUseCase,
-)
 from app.application.use_cases.update_timeline_event import (
     UpdateTimelineEvent,
 )
 
+from app.application.use_cases.remove_timeline_event import (
+    RemoveTimelineEventUseCase,
+)
 
+
+# -----------------------------------------------------------------------------
+# Intelligence
+# -----------------------------------------------------------------------------
+
+from app.application.use_cases.intelligence.analyze_career import (
+    AnalyzeCareer,
+)
+
+from app.application.use_cases.intelligence.generate_career_insights import (
+    GenerateCareerInsights,
+)
+
+from app.application.use_cases.intelligence.get_recommendations import (
+    GetRecommendations,
+)
+
+from app.application.use_cases.intelligence.generate_career_roadmap import (
+    GenerateCareerRoadmap,
+)
+
+
+# =============================================================================
+# Domain Services
+# =============================================================================
+
+from app.domain.intelligence.career_analyzer import (
+    CareerAnalyzer,
+)
+
+from app.domain.services.career_roadmap_service import (
+    CareerRoadmapService,
+)
 
 # =============================================================================
 # Container Class
@@ -257,9 +294,46 @@ class Container:
         self.professional_repository = (
             SQLiteProfessionalRepository()
         )
+    # =========================================================================
+    # Career Intelligence Use Cases
+    # =========================================================================
+
+    def analyze_career_use_case(
+        self,
+    ) -> AnalyzeCareer:
+
+        return AnalyzeCareer(
+            repository=self.professional_repository,
+            analyzer=CareerAnalyzer(),
+        )
 
 
+    def generate_career_insights_use_case(
+        self,
+    ) -> GenerateCareerInsights:
 
+        return GenerateCareerInsights(
+            repository=self.professional_repository,
+        )
+
+
+    def get_recommendations_use_case(
+        self,
+    ) -> GetRecommendations:
+
+        return GetRecommendations(
+            repository=self.professional_repository,
+        )
+
+
+    def generate_career_roadmap_use_case(
+        self,
+    ) -> GenerateCareerRoadmap:
+
+        return GenerateCareerRoadmap(
+            repository=self.professional_repository,
+            roadmap_service=CareerRoadmapService(),
+        )
     # =========================================================================
     # Professional Use Cases
     # =========================================================================
