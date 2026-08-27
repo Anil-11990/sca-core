@@ -253,6 +253,50 @@ from app.domain.intelligence.career_analyzer import (
 from app.domain.services.career_roadmap_service import (
     CareerRoadmapService,
 )
+# -----------------------------------------------------------------------------
+# Intelligence
+# -----------------------------------------------------------------------------
+
+from app.application.use_cases.intelligence.analyze_career import (
+    AnalyzeCareer,
+)
+
+from app.application.use_cases.intelligence.generate_career_insights import (
+    GenerateCareerInsights,
+)
+
+from app.application.use_cases.intelligence.get_recommendations import (
+    GetRecommendations,
+)
+
+from app.application.use_cases.intelligence.generate_career_roadmap import (
+    GenerateCareerRoadmap,
+)
+
+from app.application.use_cases.intelligence.generate_market_intelligence import (
+    GenerateMarketIntelligence,
+)
+
+
+# =============================================================================
+# Intelligence Domain Services
+# =============================================================================
+
+from app.domain.intelligence.career_analyzer import (
+    CareerAnalyzer,
+)
+
+from app.domain.intelligence.market_signal import (
+    MarketSignal,
+)
+
+from app.domain.services.career_roadmap_service import (
+    CareerRoadmapService,
+)
+
+from app.domain.services.market_intelligence_service import (
+    MarketIntelligenceService,
+)
 
 # =============================================================================
 # Container Class
@@ -334,6 +378,96 @@ class Container:
             repository=self.professional_repository,
             roadmap_service=CareerRoadmapService(),
         )
+    # =========================================================================
+    # Market Intelligence Use Case
+    # =========================================================================
+
+    def generate_market_intelligence_use_case(
+        self,
+    ) -> GenerateMarketIntelligence:
+
+        """
+        Build GenerateMarketIntelligence use case.
+
+        This use case coordinates:
+
+            - Professional repository
+            - Market intelligence domain service
+            - Market signals
+
+        Version 1:
+
+            Market signals are currently defined
+            inside the composition root.
+
+        Future versions can replace these
+        hard-coded signals with:
+
+            - MarketSignal repository
+            - Job board ingestion
+            - External market data provider
+            - AI market intelligence pipeline
+
+        Business rules do NOT belong here.
+        The Container only connects dependencies.
+        """
+
+        # ---------------------------------------------------------------------
+        # Version 1 Market Signals
+        # ---------------------------------------------------------------------
+
+        market_signals = [
+
+            MarketSignal(
+                skill="Python",
+                demand_level="High",
+                trend="Growing",
+                source="Job Market",
+            ),
+
+            MarketSignal(
+                skill="Machine Learning",
+                demand_level="High",
+                trend="Growing",
+                source="Job Market",
+            ),
+
+            MarketSignal(
+                skill="LLM",
+                demand_level="High",
+                trend="Growing",
+                source="AI Job Market",
+            ),
+
+            MarketSignal(
+                skill="Docker",
+                demand_level="Medium",
+                trend="Growing",
+                source="Job Market",
+            ),
+
+            MarketSignal(
+                skill="Kubernetes",
+                demand_level="High",
+                trend="Growing",
+                source="Job Market",
+            ),
+        ]
+
+        # ---------------------------------------------------------------------
+        # Create Market Intelligence Use Case
+        # ---------------------------------------------------------------------
+
+        return GenerateMarketIntelligence(
+            repository=self.professional_repository,
+
+            market_intelligence_service=(
+                MarketIntelligenceService()
+            ),
+
+            market_signals=market_signals,
+        )
+
     # =========================================================================
     # Professional Use Cases
     # =========================================================================

@@ -31,6 +31,10 @@ from app.api.schemas.career_intelligence_response import (
     RecommendationSchema,
 )
 
+from app.api.schemas.market_intelligence_response import (
+    MarketIntelligenceResponse,
+)
+
 from app.exceptions.professional_not_found import (
     ProfessionalNotFoundException,
 )
@@ -272,3 +276,53 @@ def get_career_roadmap(
         )
         for item in roadmap
     ]
+# ============================================================================
+# MARKET INTELLIGENCE
+# ============================================================================
+
+
+@router.get(
+    "/{professional_id}/market-intelligence",
+    response_model=MarketIntelligenceResponse,
+)
+def get_market_intelligence(
+    professional_id: UUID,
+):
+    """
+    Generate market intelligence for a Professional.
+
+    The API layer:
+
+        - receives the Professional ID
+        - delegates to GenerateMarketIntelligence
+        - converts the result into the API response schema
+
+    Business rules remain inside
+    MarketIntelligenceService.
+    """
+
+    use_case = (
+        container
+        .generate_market_intelligence_use_case()
+    )
+
+    try:
+
+        result = use_case.execute(
+            professional_id
+        )
+
+    except ProfessionalNotFoundException:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Professional not found.",
+        )
+
+    return MarketIntelligenceResponse(
+        matched_skills=result["matched_skills"],
+        opportunity_skills=result["opportunity_skills"],
+        high_priority_opportunities=(
+            result["high_priority_opportunities"]
+        ),
+    )

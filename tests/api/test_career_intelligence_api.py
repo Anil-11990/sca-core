@@ -116,3 +116,43 @@ def test_get_career_roadmap():
         assert "skill" in data[0]
         assert "priority" in data[0]
         assert "stage" in data[0]
+def test_get_market_intelligence():
+    """
+    Verify the Market Intelligence API endpoint.
+
+    The endpoint should:
+
+        - return HTTP 200
+        - return matched skills
+        - return opportunity skills
+        - return high-priority opportunities
+    """
+
+    professional_id = create_professional()
+
+    response = client.get(
+        f"/career-intelligence/{professional_id}/market-intelligence"
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert "matched_skills" in data
+    assert "opportunity_skills" in data
+    assert "high_priority_opportunities" in data
+
+    assert isinstance(
+        data["matched_skills"],
+        list,
+    )
+
+    assert isinstance(
+        data["opportunity_skills"],
+        list,
+    )
+
+    assert isinstance(
+        data["high_priority_opportunities"],
+        list,
+    )
