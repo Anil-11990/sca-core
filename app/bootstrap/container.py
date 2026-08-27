@@ -220,42 +220,9 @@ from app.application.use_cases.remove_timeline_event import (
     RemoveTimelineEventUseCase,
 )
 
-
-# -----------------------------------------------------------------------------
-# Intelligence
-# -----------------------------------------------------------------------------
-
-from app.application.use_cases.intelligence.analyze_career import (
-    AnalyzeCareer,
-)
-
-from app.application.use_cases.intelligence.generate_career_insights import (
-    GenerateCareerInsights,
-)
-
-from app.application.use_cases.intelligence.get_recommendations import (
-    GetRecommendations,
-)
-
-from app.application.use_cases.intelligence.generate_career_roadmap import (
-    GenerateCareerRoadmap,
-)
-
-
 # =============================================================================
-# Domain Services
-# =============================================================================
-
-from app.domain.intelligence.career_analyzer import (
-    CareerAnalyzer,
-)
-
-from app.domain.services.career_roadmap_service import (
-    CareerRoadmapService,
-)
-# -----------------------------------------------------------------------------
 # Intelligence
-# -----------------------------------------------------------------------------
+# =============================================================================
 
 from app.application.use_cases.intelligence.analyze_career import (
     AnalyzeCareer,
@@ -297,7 +264,6 @@ from app.domain.services.career_roadmap_service import (
 from app.domain.services.market_intelligence_service import (
     MarketIntelligenceService,
 )
-
 # =============================================================================
 # Container Class
 # =============================================================================
