@@ -44,6 +44,9 @@ from app.api.routes.timeline_routes import (
 from app.api.routes.career_intelligence_routes import (
     router as career_intelligence_router,
 )
+from app.api.routes.health_routes import (
+    router as health_router,
+)
 
 router = APIRouter()
 
@@ -57,6 +60,7 @@ router.include_router(achievement_router)
 router.include_router(certificate_router)
 router.include_router(timeline_router)
 router.include_router(career_intelligence_router)
+router.include_router(health_router)
 
 __all__ = [
     "router",
