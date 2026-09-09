@@ -40,3 +40,6 @@ Thumbs.db
 
 # Ruff
 .ruff_cache/
+# Local application database
+sca.db
+.venv

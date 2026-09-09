@@ -3,12 +3,12 @@ Domain Service:
 Career Roadmap
 
 Generates a learning roadmap
-based on career gaps.
+based on career skill gaps.
 """
 
 from app.domain.professional.professional import Professional
-from app.domain.services.career_gap_service import (
-    CareerGapService,
+from app.domain.services.skill_gap_service import (
+    SkillGapService,
 )
 
 
@@ -19,20 +19,22 @@ class CareerRoadmapService:
 
     def __init__(self):
 
-        self._gap_service = CareerGapService()
-
+        self._skill_gap_service = (
+            SkillGapService()
+        )
 
     def generate(
         self,
         professional: Professional,
+        required_skills: list[str],
     ) -> list[dict]:
 
-        gaps = self._gap_service.analyse(
-            professional
+        gaps = self._skill_gap_service.calculate(
+            professional,
+            required_skills,
         )
 
         roadmap = []
-
 
         for gap in gaps:
 
@@ -44,9 +46,7 @@ class CareerRoadmapService:
                 }
             )
 
-
         return roadmap
-
 
     def _priority(
         self,
@@ -59,7 +59,7 @@ class CareerRoadmapService:
             "llm",
         ]
 
-        if skill in high_priority:
+        if skill.lower() in high_priority:
             return "High"
 
         return "Medium"

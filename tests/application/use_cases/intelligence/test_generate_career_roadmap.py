@@ -43,13 +43,20 @@ def test_generate_career_roadmap():
     )
 
     roadmap = use_case.execute(
-        professional.id
+        professional.id,
+        [
+            "Python",
+            "FastAPI",
+            "React",
+        ],
     )
 
     assert isinstance(
         roadmap,
         list,
     )
+
+    assert len(roadmap) == 3
 
 
 def test_generate_career_roadmap_rejects_unknown_professional():
@@ -75,7 +82,11 @@ def test_generate_career_roadmap_rejects_unknown_professional():
     try:
 
         use_case.execute(
-            unknown_id
+            unknown_id,
+            [
+                "Python",
+                "FastAPI",
+            ],
         )
 
         assert False

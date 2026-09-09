@@ -14,7 +14,7 @@ Business rules remain outside this layer.
 
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from app.bootstrap.container import container
 
@@ -201,6 +201,10 @@ def get_career_insights(
 )
 def get_career_recommendations(
     professional_id: UUID,
+    required_skills: str = Query(
+        default="",
+        description="Comma-separated target-role skills.",
+    ),
 ):
     """
     Generate career recommendations for a Professional.
@@ -213,8 +217,15 @@ def get_career_recommendations(
 
     try:
 
+        target_skills = [
+            skill.strip()
+            for skill in required_skills.split(",")
+            if skill.strip()
+        ]
+
         recommendations = use_case.execute(
-            professional_id
+            professional_id,
+            target_skills or None,
         )
 
     except ProfessionalNotFoundException:
@@ -244,6 +255,10 @@ def get_career_recommendations(
 )
 def get_career_roadmap(
     professional_id: UUID,
+    required_skills: str = Query(
+        default="",
+        description="Comma-separated target-role skills.",
+    ),
 ):
     """
     Generate a career development roadmap
@@ -257,8 +272,15 @@ def get_career_roadmap(
 
     try:
 
+        target_skills = [
+            skill.strip()
+            for skill in required_skills.split(",")
+            if skill.strip()
+        ]
+
         roadmap = use_case.execute(
-            professional_id
+            professional_id,
+            target_skills,
         )
 
     except ProfessionalNotFoundException:
@@ -326,3 +348,4 @@ def get_market_intelligence(
             result["high_priority_opportunities"]
         ),
     )
+

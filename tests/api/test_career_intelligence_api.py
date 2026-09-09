@@ -99,6 +99,40 @@ def test_get_career_recommendations():
         assert "priority" in data[0]
 
 
+def test_get_career_recommendations_for_target_role_skill_gaps():
+    professional_id = create_professional()
+
+    response = client.get(
+        f"/career-intelligence/{professional_id}/recommendations",
+        params={
+            "required_skills": "Python, React, TypeScript",
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert isinstance(data, list)
+    assert len(data) == 3
+
+    target_gap = data[0]
+    skill_advice = data[1]
+    project_advice = data[2]
+
+    assert target_gap["action"] == "Close target-role skill gaps"
+    assert target_gap["priority"] == "HIGH"
+    assert "React" in target_gap["reason"]
+    assert "TypeScript" in target_gap["reason"]
+
+    assert skill_advice["action"] == "Improve technical skills"
+    assert skill_advice["priority"] == "HIGH"
+
+    assert project_advice["action"] == "Build practical projects"
+    assert project_advice["priority"] == "MEDIUM"
+
+
+
 def test_get_career_roadmap():
     professional_id = create_professional()
 
@@ -156,3 +190,8 @@ def test_get_market_intelligence():
         data["high_priority_opportunities"],
         list,
     )
+
+
+
+
+

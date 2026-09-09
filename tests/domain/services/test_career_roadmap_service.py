@@ -16,20 +16,24 @@ def test_ai_career_roadmap_generation():
         primary_goal="Become AI Engineer",
     )
 
-
     professional.add_skill(
         Skill("Python")
     )
 
-
     service = CareerRoadmapService()
 
-
     roadmap = service.generate(
-        professional
+        professional,
+        [
+            "Python",
+            "FastAPI",
+            "React",
+        ],
     )
 
+    assert len(roadmap) == 2
 
-    assert len(roadmap) > 0
+    assert roadmap[0]["skill"] == "FastAPI"
+    assert roadmap[1]["skill"] == "React"
 
     assert roadmap[0]["stage"] == "Learning"

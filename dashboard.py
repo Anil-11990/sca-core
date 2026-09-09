@@ -852,6 +852,11 @@ with tabs[2]:
         "GET",
         f"/career-intelligence/{professional_id}/recommendations",
         api_url,
+        params={
+            "required_skills": ", ".join(
+                st.session_state.required_skills
+            ),
+        },
     )
 
     if not ok:
@@ -902,9 +907,17 @@ with tabs[3]:
         unsafe_allow_html=True,
     )
 
+    roadmap_query = ",".join(
+        st.session_state.get(
+            "required_skills",
+            [],
+        )
+    )
+
     ok, roadmap = api_request(
         "GET",
-        f"/career-intelligence/{professional_id}/roadmap",
+        f"/career-intelligence/{professional_id}/roadmap"
+        f"?required_skills={roadmap_query}",
         api_url,
     )
 
@@ -1084,3 +1097,5 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+

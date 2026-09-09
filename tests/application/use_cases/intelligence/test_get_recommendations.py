@@ -10,6 +10,10 @@ from app.domain.common.value_objects.full_name import (
     FullName,
 )
 
+from app.domain.skill.skill import (
+    Skill,
+)
+
 
 class FakeProfessionalRepository:
 
@@ -65,6 +69,79 @@ def test_get_recommendations_returns_missing_project_and_skill_advice():
     assert (
         recommendations[1].priority
         == "MEDIUM"
+    )
+
+
+
+def test_get_recommendations_for_target_role_skill_gaps():
+
+    professional = Professional(
+        full_name=FullName(
+            "Anil Khanal"
+        ),
+        primary_goal=(
+            "Become an AI Full-Stack Engineer"
+        ),
+    )
+
+
+    professional.add_skill(
+        Skill("Python")
+    )
+
+    professional.add_skill(
+        Skill("FastAPI")
+    )
+
+    professional.add_skill(
+        Skill("SQL")
+    )
+
+
+    repository = FakeProfessionalRepository(
+        professional
+    )
+
+
+    use_case = GetRecommendations(
+        repository
+    )
+
+
+    recommendations = use_case.execute(
+        professional.id,
+        [
+            "Python",
+            "FastAPI",
+            "React",
+            "TypeScript",
+            "Docker",
+        ],
+    )
+
+
+    assert len(recommendations) == 2
+
+    assert (
+        recommendations[0].action
+        == "Close target-role skill gaps"
+    )
+
+    assert (
+        recommendations[0].priority
+        == "HIGH"
+    )
+
+    assert (
+        "React" in recommendations[0].reason
+    )
+
+    assert (
+        "TypeScript" in recommendations[0].reason
+    )
+
+    assert (
+        "Docker" in recommendations[0].reason
     )
 
 

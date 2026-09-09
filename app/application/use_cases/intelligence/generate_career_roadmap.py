@@ -32,6 +32,7 @@ class GenerateCareerRoadmap:
     def execute(
         self,
         professional_id: UUID,
+        required_skills: list[str],
     ) -> list[dict]:
 
         professional = (
@@ -46,5 +47,6 @@ class GenerateCareerRoadmap:
             )
 
         return self._roadmap_service.generate(
-            professional
+            professional,
+            required_skills,
         )
